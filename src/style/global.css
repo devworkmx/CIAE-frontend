@@ -1,0 +1,6 @@
+@import 'tailwindcss';
+
+@theme {
+  /* Define tus colores usando --color-nombre: #hex */
+  --color-morena: #b3282d;
+}
