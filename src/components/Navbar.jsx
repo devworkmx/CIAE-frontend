@@ -22,7 +22,11 @@ function Navbar() {
   // Se agregó "icon" para el panel móvil (cada link muestra su ícono).
   // ------------------------------------------------------------------
   const navLinks = [
-    { to: '/validacion-cursos', label: 'Validación de cursos', icon: BadgeCheck },
+    {
+      to: '/validacion-cursos',
+      label: 'Validación de cursos',
+      icon: BadgeCheck,
+    },
     { to: '/contacto', label: 'Contacto', icon: Mail },
     { to: '/nosotros', label: 'Nosotros', icon: Users },
     { to: '/login', label: 'Inicio de sesión', icon: LogIn },
@@ -37,12 +41,14 @@ function Navbar() {
     <nav className="bg-crema shadow-sm w-full relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-
           {/* ------------------------------------------------------------
               LOGO / MARCA (lado izquierdo)
               se realiza modificacion del logotipo para que sea un icono de la libreria lucide-react
           ------------------------------------------------------------ */}
-          <Link to="/" className="flex items-center gap-2 text-guinda font-bold text-xl">
+          <Link
+            to="/"
+            className="flex items-center gap-2 text-guinda font-bold text-xl"
+          >
             <Landmark className="w-6 h-6" />
             <span>CIAE</span>
           </Link>
@@ -74,7 +80,6 @@ function Navbar() {
           >
             <Menu className="w-6 h-6" />
           </button>
-
         </div>
       </div>
 
@@ -135,10 +140,10 @@ function Navbar() {
                   onClick={() => setMenuOpen(false)} // cierra el panel al elegir una opción
                   className={
                     isLast
-                      // Estilo destacado tipo botón (dorado sólido) para "Inicio de sesión"
-                      ? 'flex items-center gap-3 bg-dorado text-gray-900 font-semibold text-sm rounded-lg px-4 py-3 hover:brightness-95 transition'
-                      // Estilo normal para el resto de los links
-                      : 'flex items-center gap-3 text-sm text-gray-700 hover:text-dorado rounded-lg px-4 py-3 transition-colors duration-200'
+                      ? // Estilo destacado tipo botón (dorado sólido) para "Inicio de sesión"
+                        'flex items-center gap-3 bg-dorado text-gray-900 font-semibold text-sm rounded-lg px-4 py-3 hover:brightness-95 transition'
+                      : // Estilo normal para el resto de los links
+                        'flex items-center gap-3 text-sm text-gray-700 hover:text-dorado rounded-lg px-4 py-3 transition-colors duration-200'
                   }
                 >
                   <Icon className="w-4 h-4" />

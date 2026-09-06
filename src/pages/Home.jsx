@@ -1,4 +1,3 @@
-
 function Home() {
   return (
     <>
@@ -64,12 +63,11 @@ function Home() {
 
           <p className="text-gray-600 leading-relaxed">
             El Centro de Innovación y Aprendizaje Estratégico (CIAE) se
-            establece como la máxima autoridad en la validación y
-            estructuración de procesos educativos. Nuestra visión estratégica
-            busca no solo elevar los estándares actuales, sino redefinir las
-            metodologías de enseñanza para asegurar que cada esfuerzo
-            académico resulte en un aprendizaje profundo, aplicable y
-            certificado.
+            establece como la máxima autoridad en la validación y estructuración
+            de procesos educativos. Nuestra visión estratégica busca no solo
+            elevar los estándares actuales, sino redefinir las metodologías de
+            enseñanza para asegurar que cada esfuerzo académico resulte en un
+            aprendizaje profundo, aplicable y certificado.
           </p>
         </div>
       </section>
@@ -88,27 +86,36 @@ function Home() {
               Nuestras Áreas de Enfoque
             </h2>
             <p className="text-gray-500">
-              Pilares fundamentales para el desarrollo institucional y académico.
+              Pilares fundamentales para el desarrollo institucional y
+              académico.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-
             {/* ---------------------------------------------------------
                 TARJETA 1: Innovación Educativa
                 Cambia ícono, título, descripción y texto del link aquí.
             ---------------------------------------------------------- */}
             <article className="bg-white rounded-lg shadow-sm p-6 border border-gray-100">
               <div className="w-10 h-10 flex items-center justify-center bg-[#1b3a6b] text-dorado rounded mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-                  stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-                  className="w-5 h-5">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="w-5 h-5"
+                >
                   <circle cx="12" cy="10" r="3" />
                   <path d="M12 2a8 8 0 0 0-8 8c0 5 8 12 8 12s8-7 8-12a8 8 0 0 0-8-8Z" />
                 </svg>
               </div>
 
-              <h3 className="font-bold text-[#1b3a6b] mb-2">Innovación Educativa</h3>
+              <h3 className="font-bold text-[#1b3a6b] mb-2">
+                Innovación Educativa
+              </h3>
               <p className="text-sm text-gray-500 mb-4 leading-relaxed">
                 Desarrollo e implementación de metodologías pedagógicas de
                 vanguardia que transforman la dinámica en el aula y entornos
@@ -128,18 +135,27 @@ function Home() {
             ---------------------------------------------------------- */}
             <article className="bg-white rounded-lg shadow-sm p-6 border border-gray-100">
               <div className="w-10 h-10 flex items-center justify-center bg-[#1b3a6b] text-dorado rounded mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-                  stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-                  className="w-5 h-5">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="w-5 h-5"
+                >
                   <path d="M12 20v-6M6 20V10M18 20V4" />
                 </svg>
               </div>
 
-              <h3 className="font-bold text-[#1b3a6b] mb-2">Estrategia de Aprendizaje</h3>
+              <h3 className="font-bold text-[#1b3a6b] mb-2">
+                Estrategia de Aprendizaje
+              </h3>
               <p className="text-sm text-gray-500 mb-4 leading-relaxed">
                 Diseño de rutas curriculares y modelos de retención de
-                conocimiento basados en evidencia neurocientífica y análisis
-                de datos.
+                conocimiento basados en evidencia neurocientífica y análisis de
+                datos.
               </p>
 
               <a
@@ -155,28 +171,36 @@ function Home() {
             ---------------------------------------------------------- */}
             <article className="bg-white rounded-lg shadow-sm p-6 border border-gray-100">
               <div className="w-10 h-10 flex items-center justify-center bg-[#1b3a6b] text-dorado rounded mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-                  stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-                  className="w-5 h-5">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="w-5 h-5"
+                >
                   <circle cx="12" cy="8" r="6" />
                   <path d="M9 13.5 7 22l5-3 5 3-2-8.5" />
                 </svg>
               </div>
 
-              <h3 className="font-bold text-[#1b3a6b] mb-2">Certificación Institucional</h3>
+              <h3 className="font-bold text-[#1b3a6b] mb-2">
+                Certificación Institucional
+              </h3>
               <p className="text-sm text-gray-500 mb-4 leading-relaxed">
                 Procesos rigurosos de validación y acreditación para asegurar
                 que los cursos cumplan con los más altos estándares globales.
               </p>
 
-              
-               <a href="#"
+              <a
+                href="#"
                 className="text-sm font-semibold text-morena hover:text-guinda transition-colors duration-200"
               >
                 Proceso de validación →
               </a>
             </article>
-
           </div>
         </div>
       </section>
@@ -190,31 +214,37 @@ function Home() {
       <section className="bg-[#0f1f3d] py-14">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-
             {/* Estadística 1 */}
             <div>
               <p className="text-4xl font-bold text-dorado mb-1">+500</p>
-              <p className="text-xs tracking-wide text-gray-300">CURSOS VALIDADOS</p>
+              <p className="text-xs tracking-wide text-gray-300">
+                CURSOS VALIDADOS
+              </p>
             </div>
 
             {/* Estadística 2 */}
             <div>
               <p className="text-4xl font-bold text-dorado mb-1">+10k</p>
-              <p className="text-xs tracking-wide text-gray-300">ALUMNOS IMPACTADOS</p>
+              <p className="text-xs tracking-wide text-gray-300">
+                ALUMNOS IMPACTADOS
+              </p>
             </div>
 
             {/* Estadística 3 */}
             <div>
               <p className="text-4xl font-bold text-dorado mb-1">50</p>
-              <p className="text-xs tracking-wide text-gray-300">INSTITUCIONES ALIADAS</p>
+              <p className="text-xs tracking-wide text-gray-300">
+                INSTITUCIONES ALIADAS
+              </p>
             </div>
 
             {/* Estadística 4 */}
             <div>
               <p className="text-4xl font-bold text-dorado mb-1">98%</p>
-              <p className="text-xs tracking-wide text-gray-300">TASA DE ÉXITO</p>
+              <p className="text-xs tracking-wide text-gray-300">
+                TASA DE ÉXITO
+              </p>
             </div>
-
           </div>
         </div>
       </section>
