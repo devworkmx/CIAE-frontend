@@ -13,7 +13,7 @@ function Footer() {
   ]
 
   // ------------------------------------------------------------------
-  // COLUMNA "INSTITUCIONAL"
+  // COLUMNA ejemplo
   // Edita este arreglo si necesitas agregar/quitar/renombrar un link
   // ------------------------------------------------------------------
   const institucional = [

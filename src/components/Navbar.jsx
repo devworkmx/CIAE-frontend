@@ -92,7 +92,7 @@ function Navbar() {
       )}
 
       {/* ==================================================================
-          PANEL DESLIZABLE (MENÚ MÓVIL)
+          PANEL DESLIZABLE (MENÚ para móvil)
           Fijo a la derecha de la pantalla, ancho fijo (w-72).
           "translate-x-full" lo esconde fuera de la pantalla cuando está
           cerrado, y "translate-x-0" lo trae a la vista cuando está abierto.
