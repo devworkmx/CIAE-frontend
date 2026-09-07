@@ -1,25 +1,14 @@
+import { MapPin, ClipboardPenLine, Award, Target } from 'lucide-react'
 function Home() {
   return (
     <>
-      {/* ================================================================
-          SECCIÓN 1: HERO
-          Fondo azul marino oscuro con un sello/escudo watermark de fondo.
-          Contiene: badge, título, párrafo y dos botones de acción.
-          Cambia el texto del título/párrafo directamente en su etiqueta.
-      ================================================================ */}
+      {/* Section 1: Hero */}
       <section className="relative bg-[#0f1f3d] text-crema overflow-hidden">
-        {/* SELLO DE FONDO (watermark), solo decorativo */}
-        <svg
+        {/* SELLO DE FONDO */}
+        <Target
           className="absolute -right-24 -top-16 w-[420px] h-[420px] text-white/5 pointer-events-none select-none"
-          viewBox="0 0 200 200"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1"
-        >
-          <circle cx="100" cy="100" r="95" />
-          <circle cx="100" cy="100" r="80" />
-          <circle cx="100" cy="100" r="65" />
-        </svg>
+          strokeWidth={1}
+        />
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
           {/* Badge superior */}
@@ -98,19 +87,7 @@ function Home() {
             ---------------------------------------------------------- */}
             <article className="bg-white rounded-lg shadow-sm p-6 border border-gray-100">
               <div className="w-10 h-10 flex items-center justify-center bg-[#1b3a6b] text-dorado rounded mb-4">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="w-5 h-5"
-                >
-                  <circle cx="12" cy="10" r="3" />
-                  <path d="M12 2a8 8 0 0 0-8 8c0 5 8 12 8 12s8-7 8-12a8 8 0 0 0-8-8Z" />
-                </svg>
+                <MapPin className="w-5 h-5" />
               </div>
 
               <h3 className="font-bold text-[#1b3a6b] mb-2">
@@ -135,18 +112,7 @@ function Home() {
             ---------------------------------------------------------- */}
             <article className="bg-white rounded-lg shadow-sm p-6 border border-gray-100">
               <div className="w-10 h-10 flex items-center justify-center bg-[#1b3a6b] text-dorado rounded mb-4">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="w-5 h-5"
-                >
-                  <path d="M12 20v-6M6 20V10M18 20V4" />
-                </svg>
+                <ClipboardPenLine className="w-5 h-5" />
               </div>
 
               <h3 className="font-bold text-[#1b3a6b] mb-2">
@@ -171,19 +137,7 @@ function Home() {
             ---------------------------------------------------------- */}
             <article className="bg-white rounded-lg shadow-sm p-6 border border-gray-100">
               <div className="w-10 h-10 flex items-center justify-center bg-[#1b3a6b] text-dorado rounded mb-4">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="w-5 h-5"
-                >
-                  <circle cx="12" cy="8" r="6" />
-                  <path d="M9 13.5 7 22l5-3 5 3-2-8.5" />
-                </svg>
+                <Award className="w-5 h-5" />
               </div>
 
               <h3 className="font-bold text-[#1b3a6b] mb-2">
@@ -211,7 +165,7 @@ function Home() {
           Para agregar una estadística nueva, copia un <div>...</div>
           completo y pégalo dentro del mismo grid.
       ================================================================ */}
-      <section className="bg-[#0f1f3d] py-14">
+      <section className="bg-[#0f1f3d] py-14 border-b border-dorado/20">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             {/* Estadística 1 */}
@@ -248,6 +202,7 @@ function Home() {
           </div>
         </div>
       </section>
+      <div className="h-5 bg-white"></div>
     </>
   )
 }
