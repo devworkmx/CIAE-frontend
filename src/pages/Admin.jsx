@@ -22,7 +22,15 @@ import {
   Clock,
   KeyRound,
   ExternalLink,
+  Calendar,
 } from 'lucide-react'
+
+function calcularFechaExpiracion(fechaBaseStr, meses) {
+  if (!fechaBaseStr) return ''
+  const [year, month, day] = fechaBaseStr.split('-').map(Number)
+  const d = new Date(year, month - 1 + Number(meses), day)
+  return d.toISOString().split('T')[0]
+}
 
 function Admin() {
   const [seccion, setSeccion] = useState('certificados')
@@ -30,11 +38,13 @@ function Admin() {
   const [alumnos, setAlumnos] = useState([])
   const [certificados, setCertificados] = useState([])
 
+  const fechaHoy = new Date().toISOString().split('T')[0]
+
   // Notificaciones Toast
   const [notificacion, setNotificacion] = useState({
     mostrar: false,
     mensaje: '',
-    tipo: 'exito', // 'exito' | 'error'
+    tipo: 'exito',
   })
 
   function lanzarAlerta(mensaje, tipo = 'exito') {
@@ -48,13 +58,13 @@ function Admin() {
 
   // --- FILTROS Y PAGINACIÓN: CERTIFICADOS ---
   const [busquedaCert, setBusquedaCert] = useState('')
-  const [filtroVigenciaCert, setFiltroVigenciaCert] = useState('todos') // 'todos' | 'permanente' | 'vigentes' | 'expirados'
+  const [filtroVigenciaCert, setFiltroVigenciaCert] = useState('todos')
   const [paginaActualCert, setPaginaActualCert] = useState(1)
   const [certEditandoId, setCertEditandoId] = useState(null)
 
   // --- FILTROS Y PAGINACIÓN: ALUMNOS ---
   const [busquedaAlumno, setBusquedaAlumno] = useState('')
-  const [filtroEstadoAlumno, setFiltroEstadoAlumno] = useState('todos') // 'todos' | 'activos' | 'desactivados'
+  const [filtroEstadoAlumno, setFiltroEstadoAlumno] = useState('todos')
   const [paginaActualAlumno, setPaginaActualAlumno] = useState(1)
   const [alumnoModalCursos, setAlumnoModalCursos] = useState(null)
   const [alumnoEditandoId, setAlumnoEditandoId] = useState(null)
@@ -71,7 +81,7 @@ function Admin() {
 
   // --- FILTROS Y PAGINACIÓN: CURSOS ---
   const [busquedaCurso, setBusquedaCurso] = useState('')
-  const [filtroVigenciaCurso, setFiltroVigenciaCurso] = useState('todos') // 'todos' | 'permanente' | 'vigencia'
+  const [filtroVigenciaCurso, setFiltroVigenciaCurso] = useState('todos')
   const [paginaActualCurso, setPaginaActualCurso] = useState(1)
   const [cursoModalAlumnos, setCursoModalAlumnos] = useState(null)
   const [cursoEditandoId, setCursoEditandoId] = useState(null)
@@ -82,6 +92,7 @@ function Admin() {
     curso_id: '',
     alumno_id: '',
     instructor: '',
+    fecha_emision: fechaHoy,
     tiene_vigencia: false,
     fecha_vigencia: '',
     calificacion: '100',
@@ -124,6 +135,57 @@ function Admin() {
     cargarTodo()
   }, [])
 
+  // --- FUNCIONES REACTIVAS DE VIGENCIA ---
+  function manejarCambioCurso(cursoIdStr) {
+    const cId = parseInt(cursoIdStr)
+    const cursoSeleccionado = cursos.find((c) => c.id === cId)
+
+    if (!cursoSeleccionado) {
+      setCertForm((prev) => ({
+        ...prev,
+        curso_id: cursoIdStr,
+        tiene_vigencia: false,
+        fecha_vigencia: '',
+      }))
+      return
+    }
+
+    const tieneVigencia = Boolean(cursoSeleccionado.tiene_vigencia)
+    const meses = cursoSeleccionado.meses_vigencia || 12
+    const fechaCalculada = tieneVigencia
+      ? calcularFechaExpiracion(certForm.fecha_emision || fechaHoy, meses)
+      : ''
+
+    setCertForm((prev) => ({
+      ...prev,
+      curso_id: cursoIdStr,
+      tiene_vigencia: tieneVigencia,
+      fecha_vigencia: fechaCalculada,
+    }))
+  }
+
+  function manejarCambioFechaEmision(nuevaFecha) {
+    setCertForm((prev) => {
+      let nuevaVigencia = prev.fecha_vigencia
+      const cursoSeleccionado = cursos.find(
+        (c) => c.id === parseInt(prev.curso_id)
+      )
+
+      if (cursoSeleccionado?.tiene_vigencia) {
+        nuevaVigencia = calcularFechaExpiracion(
+          nuevaFecha,
+          cursoSeleccionado.meses_vigencia || 12
+        )
+      }
+
+      return {
+        ...prev,
+        fecha_emision: nuevaFecha,
+        fecha_vigencia: nuevaVigencia,
+      }
+    })
+  }
+
   async function descargarQrAutenticado(certId, alumnoNombre) {
     try {
       const currentOrigin = encodeURIComponent(window.location.origin)
@@ -161,6 +223,7 @@ function Admin() {
       curso_id: parseInt(certForm.curso_id),
       alumno_id: parseInt(certForm.alumno_id),
       instructor: certForm.instructor.trim(),
+      fecha_emision: certForm.fecha_emision || fechaHoy,
       tiene_vigencia: certForm.tiene_vigencia,
       fecha_vigencia:
         certForm.tiene_vigencia && certForm.fecha_vigencia
@@ -206,6 +269,7 @@ function Admin() {
       curso_id: cert.curso_id || '',
       alumno_id: cert.alumno_id || '',
       instructor: cert.instructor || '',
+      fecha_emision: cert.fecha_emision || fechaHoy,
       tiene_vigencia: cert.tiene_vigencia || false,
       fecha_vigencia: cert.fecha_vigencia || '',
       calificacion: cert.calificacion || '100',
@@ -219,6 +283,7 @@ function Admin() {
       curso_id: '',
       alumno_id: '',
       instructor: '',
+      fecha_emision: fechaHoy,
       tiene_vigencia: false,
       fecha_vigencia: '',
       calificacion: '100',
@@ -226,7 +291,6 @@ function Admin() {
   }
 
   const certificadosFiltrados = useMemo(() => {
-    const hoy = new Date().toISOString().split('T')[0]
     return certificados.filter((c) => {
       const query = busquedaCert.toLowerCase().trim()
       const alumno = c.alumno_nombre ? c.alumno_nombre.toLowerCase() : ''
@@ -242,9 +306,9 @@ function Admin() {
 
       const esPermanente = !c.tiene_vigencia
       const esExpirado =
-        c.tiene_vigencia && c.fecha_vigencia && c.fecha_vigencia < hoy
+        c.tiene_vigencia && c.fecha_vigencia && c.fecha_vigencia < fechaHoy
       const esVigente =
-        c.tiene_vigencia && (!c.fecha_vigencia || c.fecha_vigencia >= hoy)
+        c.tiene_vigencia && (!c.fecha_vigencia || c.fecha_vigencia >= fechaHoy)
 
       const coincideFiltro =
         filtroVigenciaCert === 'todos'
@@ -257,7 +321,7 @@ function Admin() {
 
       return coincideBusqueda && coincideFiltro
     })
-  }, [certificados, busquedaCert, filtroVigenciaCert])
+  }, [certificados, busquedaCert, filtroVigenciaCert, fechaHoy])
 
   const totalPaginasCert =
     Math.ceil(certificadosFiltrados.length / registrosPorPagina) || 1
@@ -611,10 +675,9 @@ function Admin() {
           </button>
         </div>
 
-        {/* ======================= VISTA: CERTIFICADOS (REFACTORIZADA) ======================= */}
+        {/* ======================= VISTA: CERTIFICADOS ======================= */}
         {seccion === 'certificados' && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-            {/* Formulario Izquierdo: Emitir / Modificar */}
             <div className="lg:col-span-4 bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-base font-bold text-[#1b3a6b] flex items-center gap-2">
@@ -638,7 +701,7 @@ function Admin() {
                   <input
                     type="text"
                     required
-                    placeholder="Ej. CIAE-2026-001"
+                    placeholder="Ej. CERT-2024-001"
                     value={certForm.folio_manual}
                     onChange={(e) =>
                       setCertForm({ ...certForm, folio_manual: e.target.value })
@@ -649,14 +712,12 @@ function Admin() {
 
                 <div>
                   <label className="block text-xs font-semibold text-gray-600 mb-1">
-                    Programa Académico (Curso) *
+                    Programa Académico *
                   </label>
                   <select
                     required
                     value={certForm.curso_id}
-                    onChange={(e) =>
-                      setCertForm({ ...certForm, curso_id: e.target.value })
-                    }
+                    onChange={(e) => manejarCambioCurso(e.target.value)}
                     className="w-full border rounded p-2 text-sm outline-none focus:border-[#1b3a6b]"
                   >
                     <option value="">Selecciona un curso</option>
@@ -691,18 +752,37 @@ function Admin() {
 
                 <div>
                   <label className="block text-xs font-semibold text-gray-600 mb-1">
-                    Instructor / Emisor *
+                    Instructor / Evaluador *
                   </label>
                   <input
                     type="text"
                     required
-                    placeholder="Nombre del instructor"
+                    placeholder="Ej. Mtro. Roberto Mendoza"
                     value={certForm.instructor}
                     onChange={(e) =>
                       setCertForm({ ...certForm, instructor: e.target.value })
                     }
                     className="w-full border rounded p-2 text-sm outline-none focus:border-[#1b3a6b]"
                   />
+                </div>
+
+                {/* Fecha de Emisión reactiva */}
+                <div>
+                  <label className="block text-xs font-semibold text-gray-600 mb-1 flex items-center gap-1">
+                    <Calendar className="w-3.5 h-3.5 text-gray-400" />
+                    Fecha de Emisión *
+                  </label>
+                  <input
+                    type="date"
+                    required
+                    value={certForm.fecha_emision}
+                    onChange={(e) => manejarCambioFechaEmision(e.target.value)}
+                    className="w-full border rounded p-2 text-sm outline-none focus:border-[#1b3a6b]"
+                  />
+                  <span className="text-[11px] text-gray-400">
+                    Calcula automáticamente la expiración si el curso cuenta con
+                    vigencia.
+                  </span>
                 </div>
 
                 <div className="flex items-center gap-2 pt-1">
@@ -714,6 +794,9 @@ function Admin() {
                       setCertForm({
                         ...certForm,
                         tiene_vigencia: e.target.checked,
+                        fecha_vigencia: e.target.checked
+                          ? certForm.fecha_vigencia
+                          : '',
                       })
                     }
                     className="rounded"
@@ -766,7 +849,6 @@ function Admin() {
               </form>
             </div>
 
-            {/* Listado Derecho: Filtros y Paginación */}
             <div className="lg:col-span-8 space-y-4">
               <div className="flex flex-col sm:flex-row items-center gap-3">
                 <div className="relative flex-1 w-full">
@@ -848,11 +930,10 @@ function Admin() {
                     </div>
                   ) : (
                     certificadosPaginados.map((cert) => {
-                      const hoy = new Date().toISOString().split('T')[0]
                       const esExpirado =
                         cert.tiene_vigencia &&
                         cert.fecha_vigencia &&
-                        cert.fecha_vigencia < hoy
+                        cert.fecha_vigencia < fechaHoy
 
                       return (
                         <div
@@ -886,14 +967,15 @@ function Admin() {
                             </p>
 
                             <p className="text-xs text-gray-500 font-mono mt-0.5">
-                              Folio: {cert.folio_manual} | Instructor:{' '}
-                              {cert.instructor}
+                              Folio: {cert.folio_manual} | Emisión:{' '}
+                              {cert.fecha_emision}
                             </p>
 
                             <p className="text-xs text-gray-400 mt-0.5">
                               {cert.tiene_vigencia
                                 ? `Vence: ${cert.fecha_vigencia}`
-                                : 'Sin fecha de expiración'}
+                                : 'Sin caducidad'}{' '}
+                              | Evaluador: {cert.instructor}
                             </p>
 
                             <a
@@ -934,7 +1016,6 @@ function Admin() {
                   )}
                 </div>
 
-                {/* Barra de Paginación de Certificados */}
                 {certificadosFiltrados.length > 0 && (
                   <div className="px-5 py-3 border-t border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-600">
                     <div>
@@ -1027,7 +1108,7 @@ function Admin() {
                   <input
                     type="text"
                     required
-                    placeholder="Ej. José de Jesús"
+                    placeholder="Ej. Juan Carlos"
                     value={alumnoForm.nombre}
                     onChange={(e) =>
                       setAlumnoForm({ ...alumnoForm, nombre: e.target.value })
@@ -1043,7 +1124,7 @@ function Admin() {
                   <input
                     type="text"
                     required
-                    placeholder="Ej. Rodríguez Ángel"
+                    placeholder="Ej. Pérez González"
                     value={alumnoForm.apellidos}
                     onChange={(e) =>
                       setAlumnoForm({
@@ -1063,7 +1144,7 @@ function Admin() {
                     type="text"
                     required
                     maxLength={18}
-                    placeholder="ROAJ950101HDFRNG01"
+                    placeholder="PEGC900101HDFRNR09"
                     value={alumnoForm.curp}
                     onChange={(e) =>
                       setAlumnoForm({
@@ -1081,7 +1162,7 @@ function Admin() {
                   </label>
                   <input
                     type="email"
-                    placeholder="alumno@correo.com"
+                    placeholder="ejemplo.alumno@institucion.mx"
                     value={alumnoForm.email}
                     onChange={(e) =>
                       setAlumnoForm({ ...alumnoForm, email: e.target.value })
@@ -1096,7 +1177,7 @@ function Admin() {
                   </label>
                   <input
                     type="tel"
-                    placeholder="+52 ..."
+                    placeholder="+52 55 1234 5678"
                     value={alumnoForm.telefono}
                     onChange={(e) =>
                       setAlumnoForm({ ...alumnoForm, telefono: e.target.value })
@@ -1373,7 +1454,7 @@ function Admin() {
                   <input
                     type="text"
                     required
-                    placeholder="Ej. Seguridad en Redes y CCTV"
+                    placeholder="Ej. Formación de Instructores"
                     value={cursoForm.nombre}
                     onChange={(e) =>
                       setCursoForm({ ...cursoForm, nombre: e.target.value })
@@ -1388,7 +1469,7 @@ function Admin() {
                   </label>
                   <input
                     type="text"
-                    placeholder="Ej. CIAE-2026-REDES"
+                    placeholder="Ej. CURS-2024-EDU"
                     value={cursoForm.clave_curso}
                     onChange={(e) =>
                       setCursoForm({
@@ -1687,7 +1768,7 @@ function Admin() {
           </div>
         )}
 
-        {/* ======================= MODAL: ALUMNOS DEL CURSO ======================= */}
+        {/* ======================= MODAL: ALUMNOS ASIGNADOS AL CURSO ======================= */}
         {cursoModalAlumnos && (
           <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 z-50">
             <div className="bg-white rounded-xl max-w-lg w-full p-6 shadow-2xl relative space-y-4">
