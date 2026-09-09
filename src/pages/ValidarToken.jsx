@@ -10,6 +10,7 @@ import {
   User,
   UserCheck,
   ShieldCheck,
+  UserX,
 } from 'lucide-react'
 import { API_URL } from '../services/api'
 
@@ -46,13 +47,28 @@ function ValidarToken() {
     )
   }
 
-  const esValidoYVigente = datos?.valido && datos?.vigente
+  // Comprobaciones de estado
+  const esAlumnoInactivo =
+    datos?.alumno_activo === false ||
+    datos?.motivo_invalidez === 'ALUMNO_DADO_DE_BAJA'
+  const esVencido =
+    datos?.valido &&
+    !datos?.vigente &&
+    datos?.motivo_invalidez === 'CERTIFICADO_VENCIDO'
+  const esValidoYVigente = datos?.valido && datos?.vigente && !esAlumnoInactivo
 
   return (
     <div className="min-h-screen bg-slate-100 py-12 px-4 flex items-center justify-center">
       <div className="max-w-lg w-full bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-200">
+        {/* Cabecera dinámica de Estado */}
         <div
-          className={`p-6 text-white text-center ${esValidoYVigente ? 'bg-[#1b3a6b]' : 'bg-red-800'}`}
+          className={`p-6 text-white text-center ${
+            esValidoYVigente
+              ? 'bg-[#1b3a6b]'
+              : esAlumnoInactivo
+                ? 'bg-red-900'
+                : 'bg-red-800'
+          }`}
         >
           {esValidoYVigente ? (
             <>
@@ -62,16 +78,22 @@ function ValidarToken() {
                 Folio: {datos.folio}
               </p>
             </>
+          ) : esAlumnoInactivo ? (
+            <>
+              <UserX className="w-16 h-16 mx-auto mb-2 text-red-200" />
+              <h1 className="text-2xl font-bold">Certificado Inhabilitado</h1>
+              <p className="text-xs uppercase tracking-widest text-red-200">
+                Titular dado de baja del registro institucional
+              </p>
+            </>
           ) : (
             <>
               <XCircle className="w-16 h-16 mx-auto mb-2 text-red-200" />
               <h1 className="text-2xl font-bold">
-                {datos?.valido && !datos?.vigente
-                  ? 'Certificado Vencido'
-                  : 'Certificado No Válido'}
+                {esVencido ? 'Certificado Vencido' : 'Certificado No Válido'}
               </h1>
               <p className="text-xs uppercase tracking-widest text-red-200">
-                {datos?.valido && !datos?.vigente
+                {esVencido
                   ? 'El documento superó su fecha límite de vigencia'
                   : 'Registro no encontrado o revocado'}
               </p>
@@ -80,15 +102,37 @@ function ValidarToken() {
         </div>
 
         <div className="p-6">
-          {datos?.valido ? (
+          {datos ? (
             <div className="space-y-4">
+              {/* Alerta Destacada si el alumno está dado de baja */}
+              {esAlumnoInactivo && (
+                <div className="bg-red-50 border-l-4 border-red-600 p-4 rounded-r-lg">
+                  <div className="flex items-center gap-2 text-red-800 font-bold text-sm mb-1">
+                    <ShieldAlert className="w-4 h-4 text-red-600 shrink-0" />
+                    DOCUMENTO OFICIALMENTE SUSPENDIDO
+                  </div>
+                  <p className="text-xs text-red-700 leading-relaxed">
+                    La validez de esta constancia ha quedado sin efecto debido a
+                    que el alumno titular no se encuentra activo en el padrón
+                    institucional.
+                  </p>
+                </div>
+              )}
+
               <div className="border-b pb-3">
                 <span className="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1">
                   Acreditado a
                 </span>
-                <div className="flex items-center gap-2 text-base font-bold text-gray-800">
-                  <User className="w-4 h-4 text-dorado" />
-                  {datos.alumno_nombre}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-base font-bold text-gray-800">
+                    <User className="w-4 h-4 text-dorado" />
+                    {datos.alumno_nombre}
+                  </div>
+                  {esAlumnoInactivo && (
+                    <span className="text-[10px] font-bold bg-red-100 text-red-800 px-2 py-0.5 rounded-full">
+                      INACTIVO
+                    </span>
+                  )}
                 </div>
               </div>
 
@@ -133,8 +177,14 @@ function ValidarToken() {
                 </div>
               </div>
 
+              {/* Dictamen final de vigencia */}
               <div className="p-3 rounded-lg text-sm text-center font-medium">
-                {datos.tiene_vigencia ? (
+                {esAlumnoInactivo ? (
+                  <div className="bg-red-50 text-red-800 p-2 rounded font-bold text-xs flex items-center justify-center gap-1.5">
+                    <ShieldAlert className="w-4 h-4 text-red-600" />
+                    ESTATUS: NO VIGENTE (BAJA INSTITUCIONAL)
+                  </div>
+                ) : datos.tiene_vigencia ? (
                   datos.vigente ? (
                     <div className="bg-emerald-50 text-emerald-800 p-2 rounded flex items-center justify-center gap-2">
                       <ShieldCheck className="w-4 h-4" />

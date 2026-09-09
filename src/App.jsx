@@ -10,6 +10,7 @@ import Login from './pages/Login'
 import ValidarToken from './pages/ValidarToken'
 import Admin from './pages/Admin'
 import RutaProtegida from './components/RutaProtegida'
+import RutaPublica from './components/RutaPublica'
 
 function App() {
   return (
@@ -21,9 +22,18 @@ function App() {
           <Route path="/contact" element={<Contact />} />
           <Route path="/nosotros" element={<Nosotros />} />
           <Route path="/validacion-cursos" element={<Validacion />} />
-          <Route path="/login" element={<Login />} />
 
-          {/* Ruta pública escaneada por el QR en celulares */}
+          {/* Si ya está logueado, redirige automáticamente a /admin */}
+          <Route
+            path="/login"
+            element={
+              <RutaPublica>
+                <Login />
+              </RutaPublica>
+            }
+          />
+
+          {/* Ruta pública escaneada por el QR */}
           <Route path="/validar/:token" element={<ValidarToken />} />
 
           {/* Panel privado protegido */}

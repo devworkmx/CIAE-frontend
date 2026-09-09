@@ -1,22 +1,31 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
-// Se importan los iconos necesarios para las opciones de los menus desplegados utilizando la libreria lucide-react, se pueden agregar o quitar iconos según se necesite
+import { Link, useNavigate } from 'react-router-dom'
 import {
   Landmark,
   Menu,
   X,
   BadgeCheck,
-  Info,
   Mail,
   Users,
   LogIn,
+  LayoutDashboard,
+  LogOut,
 } from 'lucide-react'
 
 function Navbar() {
-  // Controla si el menú móvil (panel deslizable) está abierto o cerrado
   const [menuOpen, setMenuOpen] = useState(false)
+  const navigate = useNavigate()
 
-  const navLinks = [
+  // Comprobamos si el usuario tiene sesión activa
+  const token = localStorage.getItem('ciae_token')
+
+  const handleLogout = () => {
+    localStorage.removeItem('ciae_token')
+    setMenuOpen(false)
+    navigate('/login')
+  }
+
+  const baseLinks = [
     {
       to: '/validacion-cursos',
       label: 'Validación de cursos',
@@ -24,7 +33,6 @@ function Navbar() {
     },
     { to: '/contact', label: 'Contacto', icon: Mail },
     { to: '/nosotros', label: 'Nosotros', icon: Users },
-    { to: '/login', label: 'Inicio de sesión', icon: LogIn },
   ]
 
   return (
@@ -39,8 +47,9 @@ function Navbar() {
             <span>CIAE</span>
           </Link>
 
-          <div className="hidden md:flex items-center gap-8">
-            {navLinks.map((link) => (
+          {/* Menú Desktop */}
+          <div className="hidden md:flex items-center gap-6">
+            {baseLinks.map((link) => (
               <Link
                 key={link.label}
                 to={link.to}
@@ -49,8 +58,36 @@ function Navbar() {
                 {link.label}
               </Link>
             ))}
+
+            {token ? (
+              <div className="flex items-center gap-4 ml-2">
+                <Link
+                  to="/admin"
+                  className="flex items-center gap-1.5 text-sm font-semibold text-guinda hover:text-dorado transition-colors"
+                >
+                  <LayoutDashboard className="w-4 h-4" />
+                  <span>Panel Admin</span>
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center gap-1.5 bg-red-50 text-red-600 hover:bg-red-100 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span>Cerrar sesión</span>
+                </button>
+              </div>
+            ) : (
+              <Link
+                to="/login"
+                className="flex items-center gap-2 bg-dorado text-gray-900 font-semibold text-sm rounded-lg px-4 py-2 hover:brightness-95 transition"
+              >
+                <LogIn className="w-4 h-4" />
+                <span>Inicio de sesión</span>
+              </Link>
+            )}
           </div>
 
+          {/* Botón hamburguesa móvil */}
           <button
             onClick={() => setMenuOpen(true)}
             className="md:hidden text-guinda"
@@ -61,6 +98,7 @@ function Navbar() {
         </div>
       </div>
 
+      {/* Overlay oscuro móvil */}
       {menuOpen && (
         <div
           onClick={() => setMenuOpen(false)}
@@ -68,14 +106,12 @@ function Navbar() {
         />
       )}
 
+      {/* Menú Lateral Móvil */}
       <aside
         className={`fixed top-0 right-0 h-full w-72 bg-crema z-50 shadow-xl
           transform transition-transform duration-300 ease-in-out md:hidden
           ${menuOpen ? 'translate-x-0' : 'translate-x-full'}`}
       >
-        {/* ----------------------------------------------------------------
-            ENCABEZADO DEL PANEL
-        ----------------------------------------------------------------- */}
         <div className="flex items-center justify-between px-6 py-5 border-b border-gray-200">
           <h2 className="text-lg font-bold text-gray-900">CIAE</h2>
           <button
@@ -88,22 +124,14 @@ function Navbar() {
         </div>
 
         <ul className="flex flex-col gap-2 px-4 py-4 list-none">
-          {navLinks.map((link, index) => {
+          {baseLinks.map((link) => {
             const Icon = link.icon
-            const isLast = index === navLinks.length - 1 // "Inicio de sesión"
-
             return (
               <li key={link.label}>
                 <Link
                   to={link.to}
-                  onClick={() => setMenuOpen(false)} // cierra el panel al elegir una opción
-                  className={
-                    isLast
-                      ? // Estilo destacado tipo botón (dorado sólido) para "Inicio de sesión"
-                        'flex items-center gap-3 bg-dorado text-gray-900 font-semibold text-sm rounded-lg px-4 py-3 hover:brightness-95 transition'
-                      : // Estilo normal para el resto de los links
-                        'flex items-center gap-3 text-sm text-gray-700 hover:text-dorado rounded-lg px-4 py-3 transition-colors duration-200'
-                  }
+                  onClick={() => setMenuOpen(false)}
+                  className="flex items-center gap-3 text-sm text-gray-700 hover:text-dorado rounded-lg px-4 py-3 transition-colors duration-200"
                 >
                   <Icon className="w-4 h-4" />
                   <span>{link.label}</span>
@@ -111,6 +139,41 @@ function Navbar() {
               </li>
             )
           })}
+
+          {token ? (
+            <>
+              <li>
+                <Link
+                  to="/admin"
+                  onClick={() => setMenuOpen(false)}
+                  className="flex items-center gap-3 text-sm font-semibold text-guinda bg-gray-50 rounded-lg px-4 py-3 transition-colors"
+                >
+                  <LayoutDashboard className="w-4 h-4" />
+                  <span>Panel Admin</span>
+                </Link>
+              </li>
+              <li>
+                <button
+                  onClick={handleLogout}
+                  className="w-full flex items-center gap-3 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg px-4 py-3 transition-colors text-left"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span>Cerrar sesión</span>
+                </button>
+              </li>
+            </>
+          ) : (
+            <li>
+              <Link
+                to="/login"
+                onClick={() => setMenuOpen(false)}
+                className="flex items-center gap-3 bg-dorado text-gray-900 font-semibold text-sm rounded-lg px-4 py-3 hover:brightness-95 transition"
+              >
+                <LogIn className="w-4 h-4" />
+                <span>Inicio de sesión</span>
+              </Link>
+            </li>
+          )}
         </ul>
       </aside>
     </nav>
