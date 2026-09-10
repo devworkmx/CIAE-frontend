@@ -14,6 +14,15 @@ import {
 } from 'lucide-react'
 import { API_URL } from '../services/api'
 
+// Función para transformar YYYY-MM-DD a DD/MM/YYYY
+function formatearFecha(fechaStr) {
+  if (!fechaStr) return ''
+  const partes = fechaStr.split('-')
+  if (partes.length !== 3) return fechaStr
+  const [anio, mes, dia] = partes
+  return `${dia}/${mes}/${anio}`
+}
+
 function ValidarToken() {
   const { token } = useParams()
   const [cargando, setCargando] = useState(true)
@@ -104,7 +113,7 @@ function ValidarToken() {
         <div className="p-6">
           {datos ? (
             <div className="space-y-4">
-              {/* Alerta Destacada si el alumno está dado de baja */}
+              {/* Alerta si el alumno está dado de baja */}
               {esAlumnoInactivo && (
                 <div className="bg-red-50 border-l-4 border-red-600 p-4 rounded-r-lg">
                   <div className="flex items-center gap-2 text-red-800 font-bold text-sm mb-1">
@@ -172,12 +181,12 @@ function ValidarToken() {
                   </span>
                   <div className="flex items-center gap-1 text-sm text-gray-700">
                     <Calendar className="w-4 h-4 text-gray-400" />
-                    {datos.fecha_emision}
+                    {formatearFecha(datos.fecha_emision)}
                   </div>
                 </div>
               </div>
 
-              {/* Dictamen final de vigencia */}
+              {/* Vigencia */}
               <div className="p-3 rounded-lg text-sm text-center font-medium">
                 {esAlumnoInactivo ? (
                   <div className="bg-red-50 text-red-800 p-2 rounded font-bold text-xs flex items-center justify-center gap-1.5">
@@ -188,11 +197,11 @@ function ValidarToken() {
                   datos.vigente ? (
                     <div className="bg-emerald-50 text-emerald-800 p-2 rounded flex items-center justify-center gap-2">
                       <ShieldCheck className="w-4 h-4" />
-                      Vigente hasta el {datos.fecha_vigencia}
+                      Vigente hasta el {formatearFecha(datos.fecha_vigencia)}
                     </div>
                   ) : (
                     <div className="bg-red-50 text-red-700 p-2 rounded">
-                      Expiró el {datos.fecha_vigencia}
+                      Expiró el {formatearFecha(datos.fecha_vigencia)}
                     </div>
                   )
                 ) : (
