@@ -1,53 +1,57 @@
 import { Link } from 'react-router-dom'
 import { Landmark, Globe, Share2, Phone, Mail, MapPin } from 'lucide-react'
+
 function Footer() {
-  // COLUMNA "ENLACES RÁPIDOS" arreglo para acceso rapido
+  const anioActual = new Date().getFullYear()
+
+  // Enlaces rápidos para navegación directa
   const enlacesRapidos = [
     { to: '/validacion-cursos', label: 'Validación de cursos' },
     { to: '/nosotros', label: 'Sobre nosotros' },
-    { to: '/Contact', label: 'Contacto' },
+    { to: '/Contact', label: 'Contacto y soporte' },
   ]
 
-  // COLUMNA "INSTITUCIONAL" arreglo para acceso rapido
-
+  // Enlaces de políticas y normatividad institucional
   const institucional = [
-    { to: '/nosotros', label: 'Nosotros' },
-    { to: '/privacidad', label: 'Privacidad' },
+    { to: '/privacidad', label: 'Aviso de Privacidad' },
     { to: '/terminos', label: 'Términos de Servicio' },
   ]
 
   return (
-    <footer className="bg-azulmarino text-crema">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Utilizando Grid divide la pantalla en 4 columnas */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
-          {/* COLUMNA 1: LOGO + DESCRIPCIÓN */}
-          <div>
+    <footer
+      className="bg-azulmarino text-slate-100 border-t border-slate-800"
+      role="contentinfo"
+    >
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
+        {/* Grid estructurado de 4 columnas */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-10 lg:gap-12">
+          {/* COLUMNA 1: IDENTIDAD INSTITUCIONAL */}
+          <div className="space-y-4">
             <Link
               to="/"
-              className="flex items-center gap-2 text-dorado font-bold text-xl mb-4"
+              className="inline-flex items-center gap-2 text-dorado font-bold text-xl tracking-wide rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dorado"
+              aria-label="CIAE - Volver al inicio"
             >
-              <Landmark className="w-6 h-6" />
+              <Landmark className="w-6 h-6 shrink-0" aria-hidden="true" />
               <span>CIAE</span>
             </Link>
-            {/* Texto descriptivo institucional, edítalo libremente */}
-            <p className="text-sm text-gray-300 leading-relaxed">
+            <p className="text-sm text-slate-200 leading-relaxed">
               Centro de Innovación y Aprendizaje Estratégico. Forjando el futuro
-              de la educación mediante el rigor institucional.
+              de la educación mediante el rigor y la validez institucional.
             </p>
           </div>
 
           {/* COLUMNA 2: ENLACES RÁPIDOS */}
-          <nav aria-label="Enlaces rápidos">
-            <h2 className="text-dorado font-semibold text-sm tracking-wide mb-4">
-              ENLACES RÁPIDOS
+          <nav aria-label="Enlaces rápidos" className="space-y-4">
+            <h2 className="text-dorado font-bold text-xs tracking-wider uppercase">
+              Enlaces Rápidos
             </h2>
-            <ul className="flex flex-col gap-3 list-none">
+            <ul className="space-y-2.5 list-none p-0 m-0">
               {enlacesRapidos.map((link) => (
                 <li key={link.to}>
                   <Link
                     to={link.to}
-                    className="text-sm text-crema hover:text-dorado transition-colors duration-200"
+                    className="inline-block py-1 text-sm text-slate-200 hover:text-dorado transition-colors duration-200 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dorado"
                   >
                     {link.label}
                   </Link>
@@ -56,17 +60,17 @@ function Footer() {
             </ul>
           </nav>
 
-          {/*Columna 3  llama a la constante Institucional*/}
-          <nav aria-label="Institucional">
-            <h2 className="text-dorado font-semibold text-sm tracking-wide mb-4">
-              INSTITUCIONAL
+          {/* COLUMNA 3: INSTITUCIONAL */}
+          <nav aria-label="Legal e institucional" className="space-y-4">
+            <h2 className="text-dorado font-bold text-xs tracking-wider uppercase">
+              Institucional
             </h2>
-            <ul className="flex flex-col gap-3 list-none">
+            <ul className="space-y-2.5 list-none p-0 m-0">
               {institucional.map((link) => (
                 <li key={link.to}>
                   <Link
                     to={link.to}
-                    className="text-sm text-crema hover:text-dorado transition-colors duration-200"
+                    className="inline-block py-1 text-sm text-slate-200 hover:text-dorado transition-colors duration-200 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dorado"
                   >
                     {link.label}
                   </Link>
@@ -75,54 +79,74 @@ function Footer() {
             </ul>
           </nav>
 
-          {/* Columna 4 donde se puede editar los datos de coctacto */}
-          <address className="not-italic">
-            <h2 className="text-dorado font-semibold text-sm tracking-wide mb-4">
-              CONTACTO
+          {/* COLUMNA 4: DATOS DE CONTACTO */}
+          <div className="space-y-4">
+            <h2 className="text-dorado font-bold text-xs tracking-wider uppercase">
+              Contacto Oficial
             </h2>
-            <ul className="flex flex-col gap-3 list-none text-sm">
-              {/* Dirección */}
-              <li className="flex items-center gap-2">
-                <MapPin className="w-4 h-4 text-dorado shrink-0" />
+            <address className="not-italic space-y-3 text-sm text-slate-200">
+              {/* Ubicación física */}
+              <div className="flex items-start gap-2.5">
+                <MapPin
+                  className="w-4 h-4 text-dorado shrink-0 mt-0.5"
+                  aria-hidden="true"
+                />
                 <span>Edificio Académico Central</span>
-              </li>
+              </div>
 
-              {/* Correo electrónico */}
-              <li className="flex items-center gap-2">
-                <Mail className="w-4 h-4 text-dorado shrink-0" />
+              {/* Correo oficial */}
+              <div className="flex items-center gap-2.5">
+                <Mail
+                  className="w-4 h-4 text-dorado shrink-0"
+                  aria-hidden="true"
+                />
                 <a
                   href="mailto:contacto@ciae.edu"
-                  className="hover:text-dorado transition-colors duration-200"
+                  className="py-1 hover:text-dorado transition-colors duration-200 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dorado"
                 >
                   contacto@ciae.edu
                 </a>
-              </li>
+              </div>
+
               {/* Teléfono */}
-              <li className="flex items-center gap-2">
-                <Phone className="w-4 h-4 text-dorado shrink-0" />
+              <div className="flex items-center gap-2.5">
+                <Phone
+                  className="w-4 h-4 text-dorado shrink-0"
+                  aria-hidden="true"
+                />
                 <a
                   href="tel:+18005552423"
-                  className="hover:text-dorado transition-colors duration-200"
+                  className="py-1 hover:text-dorado transition-colors duration-200 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dorado"
                 >
                   +1 800 555 CIAE
                 </a>
-              </li>
-            </ul>
-          </address>
+              </div>
+            </address>
+          </div>
         </div>
 
-        {/* Linea divisora Inferior */}
-        <hr className="border-t border-gray-600 my-8" />
+        {/* Separador sutil */}
+        <hr className="border-t border-slate-700/80 my-10" />
 
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-400">
-          <p>© 2024 CIAE. Institutional authority in intellectual rigor.</p>
+        {/* BARRA INFERIOR DE DERECHOS Y ACCIONES */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-300">
+          <p>© {anioActual} CIAE. Todos los derechos reservados.</p>
 
-          <div className="flex items-center gap-4">
-            {/* Ícono de idioma/globo */}
-            <Globe className="w-4 h-4" />
-            {/* Ícono de compartir/redes */}
-
-            <Share2 className="w-4 h-4" />
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              aria-label="Seleccionar idioma regional"
+              className="p-2 rounded-lg text-slate-300 hover:text-dorado hover:bg-slate-800/60 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dorado"
+            >
+              <Globe className="w-4 h-4" aria-hidden="true" />
+            </button>
+            <button
+              type="button"
+              aria-label="Compartir este sitio web"
+              className="p-2 rounded-lg text-slate-300 hover:text-dorado hover:bg-slate-800/60 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dorado"
+            >
+              <Share2 className="w-4 h-4" aria-hidden="true" />
+            </button>
           </div>
         </div>
       </div>

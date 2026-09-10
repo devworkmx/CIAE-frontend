@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Allow: /validar/
+Allow: /validacion-cursos
+Disallow: /admin
