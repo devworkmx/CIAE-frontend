@@ -20,7 +20,7 @@ import { API_URL } from '../services/api'
 
 function formatearFecha(fechaStr) {
   if (!fechaStr) return ''
-  const partes = fechaStr.split('-')
+  const partes = String(fechaStr).split('-')
   if (partes.length !== 3) return fechaStr
   const [anio, mes, dia] = partes
   return `${dia}/${mes}/${anio}`
@@ -96,7 +96,35 @@ export default function Validacion() {
         )
       }
 
-      setDatosRespuesta(data)
+      // NORMALIZADOR: detecta qué estructura devolvió el backend
+      if (data.certificados && Array.isArray(data.certificados)) {
+        // Estructura nueva (BusquedaPublicaResponse)
+        setDatosRespuesta(data)
+      } else if (Array.isArray(data)) {
+        // En caso de array directo
+        setDatosRespuesta({
+          tipo_consulta: metodoBusqueda,
+          alumno: data[0]
+            ? {
+                nombre: data[0].alumno_nombre,
+                curp: valorLimpio,
+                activo: data[0].alumno_activo,
+              }
+            : null,
+          certificados: data,
+        })
+      } else {
+        // Estructura clásica (objeto Certificado único)
+        setDatosRespuesta({
+          tipo_consulta: 'folio',
+          alumno: {
+            nombre: data.alumno_nombre,
+            curp: data.curp || '',
+            activo: data.alumno_activo !== false,
+          },
+          certificados: [data],
+        })
+      }
     } catch (err) {
       setErrorBusqueda(err.message)
     } finally {
@@ -111,7 +139,7 @@ export default function Validacion() {
   return (
     <main className="bg-slate-50 min-h-screen py-12 sm:py-16">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Encabezado accesible */}
+        {/* Encabezado */}
         <header className="text-center mb-10">
           <h1 className="text-2xl sm:text-3xl font-bold text-[#1b3a6b] mb-2 tracking-tight">
             Validación de Cursos y Certificados
@@ -243,7 +271,7 @@ export default function Validacion() {
                     }
                     placeholder={
                       metodoBusqueda === 'folio'
-                        ? 'Ej. CERT-2024-001'
+                        ? 'Ej. CER-01'
                         : 'Ej. ABCD960101HDFXYZ01'
                     }
                     className="w-full border border-slate-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#1b3a6b] font-mono"
@@ -302,6 +330,7 @@ export default function Validacion() {
           )}
         </div>
 
+        {/* Mensaje de Error */}
         {errorBusqueda && (
           <aside
             role="alert"
@@ -315,9 +344,10 @@ export default function Validacion() {
           </aside>
         )}
 
-        {/* ===================== RESULTADOS ===================== */}
+        {/* ===================== RESULTADOS DE BÚSQUEDA ===================== */}
         {datosRespuesta && (
           <section aria-labelledby="resultado-titulo" className="space-y-6">
+            {/* Cabecera del Alumno */}
             {alumnoInfo && (
               <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
@@ -377,6 +407,7 @@ export default function Validacion() {
               </div>
             )}
 
+            {/* Alerta de Baja */}
             {esBajaInstitucional && (
               <div className="bg-red-50 border-l-4 border-red-600 p-4 rounded-r-xl">
                 <div className="flex items-center gap-2 text-red-800 font-bold text-sm mb-1">
@@ -394,6 +425,7 @@ export default function Validacion() {
               </div>
             )}
 
+            {/* Listado de Certificados */}
             <div className="space-y-4">
               {certificadosList.length === 0 ? (
                 <div className="bg-white p-8 text-center rounded-xl border border-slate-200 text-slate-500 text-sm">
@@ -401,16 +433,17 @@ export default function Validacion() {
                   registro.
                 </div>
               ) : (
-                certificadosList.map((cert) => {
+                certificadosList.map((cert, index) => {
                   const tieneVig = Boolean(cert.tiene_vigencia)
                   const fechaExp = cert.fecha_vigencia
                   const esExpirado = tieneVig && fechaExp && fechaExp < fechaHoy
                   const esValido =
                     cert.valido !== false && !esExpirado && !esBajaInstitucional
+                  const folioMostrar = cert.folio_manual || cert.folio || 'N/A'
 
                   return (
                     <article
-                      key={cert.id || cert.folio || cert.token_publico}
+                      key={cert.id || cert.token_publico || index}
                       className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden transition hover:shadow-md"
                     >
                       <div
@@ -437,7 +470,7 @@ export default function Validacion() {
                                 : 'Documento Sin Validez Vigente'}
                             </h3>
                             <p className="text-[11px] font-mono opacity-80">
-                              Folio: {cert.folio_manual || cert.folio}
+                              Folio: {folioMostrar}
                             </p>
                           </div>
                         </div>
@@ -551,7 +584,7 @@ export default function Validacion() {
                                 className="w-3.5 h-3.5"
                                 aria-hidden="true"
                               />
-                              <span>Constancia Oficial Digital</span>
+                              <span>Ver Certificado Oficial</span>
                             </a>
                           )}
                         </div>
