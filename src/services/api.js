@@ -1,6 +1,6 @@
-// Si estás navegando desde 192.168.x.x:5173, apuntará a http://192.168.x.x:8000 automáticamente
-const hostname = window.location.hostname
-export const API_URL = import.meta.env.VITE_API_URL || `http://${hostname}:8000`
+// Si hay una variable de entorno definida (por ejemplo en producción), la usa;
+// de lo contrario, deja un string vacío para hacer peticiones relativas al mismo origen y protocolo.
+export const API_URL = import.meta.env.VITE_API_URL || ''
 
 export function getAuthHeaders() {
   const token = localStorage.getItem('ciae_token')

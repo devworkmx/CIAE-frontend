@@ -1,4 +1,6 @@
-import { useState, useRef, useEffect, useId } from 'react'
+import { useState, useRef, useEffect, useId, useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
+import jsQR from 'jsqr'
 import {
   Search,
   QrCode,
@@ -15,6 +17,7 @@ import {
   ShieldCheck,
   ShieldAlert,
   ExternalLink,
+  Upload,
 } from 'lucide-react'
 import { API_URL } from '../services/api'
 
@@ -184,6 +187,7 @@ function TarjetaCertificadoOficial({ cert, alumnoActivo = true, fechaHoy }) {
 }
 
 export default function Validacion() {
+  const navigate = useNavigate()
   const [tabActiva, setTabActiva] = useState('manual')
   const [metodoBusqueda, setMetodoBusqueda] = useState('folio')
   const [valorBusqueda, setValorBusqueda] = useState('')
@@ -194,34 +198,124 @@ export default function Validacion() {
 
   const videoRef = useRef(null)
   const streamRef = useRef(null)
+  const animFrameRef = useRef(null)
   const [errorCamara, setErrorCamara] = useState('')
+  const [escaneando, setEscaneando] = useState(false)
 
   const inputBusquedaId = useId()
   const fechaHoy = new Date().toISOString().split('T')[0]
 
+  const procesarResultadoQR = useCallback(
+    (textoQR) => {
+      if (!textoQR) return
+
+      if (textoQR.includes('/validar/')) {
+        const partes = textoQR.split('/validar/')[1]
+        const tokenExtraido = partes.split('?')[0].split('#')[0]
+        navigate(`/validar/${tokenExtraido}`)
+      } else {
+        setTabActiva('manual')
+        setMetodoBusqueda('folio')
+        setValorBusqueda(textoQR.trim())
+      }
+    },
+    [navigate]
+  )
+
+  // Escaneo continuo con la cámara en vivo
   useEffect(() => {
+    let detenido = false
+    const canvas = document.createElement('canvas')
+    const ctx = canvas.getContext('2d', { willReadFrequently: true })
+
+    function escanearFrame() {
+      if (detenido) return
+
+      const video = videoRef.current
+      if (video && video.readyState === video.HAVE_ENOUGH_DATA) {
+        canvas.width = video.videoWidth
+        canvas.height = video.videoHeight
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
+
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+        const codigo = jsQR(imageData.data, imageData.width, imageData.height, {
+          inversionAttempts: 'dontInvert',
+        })
+
+        if (codigo && codigo.data) {
+          detenerCamara()
+          procesarResultadoQR(codigo.data)
+          return
+        }
+      }
+
+      animFrameRef.current = requestAnimationFrame(escanearFrame)
+    }
+
     async function iniciarCamara() {
+      setErrorCamara('')
+
+      if (
+        window.location.protocol !== 'https:' &&
+        window.location.hostname !== 'localhost' &&
+        window.location.hostname !== '127.0.0.1'
+      ) {
+        setErrorCamara(
+          'Para usar la cámara en vivo desde un celular se requiere HTTPS. Puedes subir una foto del código QR abajo o usar la búsqueda manual.'
+        )
+        return
+      }
+
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        setErrorCamara(
+          'Tu navegador no permite el acceso a la cámara. Sube la foto del QR abajo.'
+        )
+        return
+      }
+
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: 'environment' },
+          video: {
+            facingMode: 'environment',
+            width: { ideal: 1280 },
+            height: { ideal: 720 },
+          },
         })
         streamRef.current = stream
         if (videoRef.current) {
           videoRef.current.srcObject = stream
+          videoRef.current.setAttribute('playsinline', 'true')
+          await videoRef.current.play()
+          setEscaneando(true)
+          animFrameRef.current = requestAnimationFrame(escanearFrame)
         }
-        setErrorCamara('')
-      } catch {
-        setErrorCamara(
-          'No se pudo acceder a la cámara. Verifica los permisos de tu dispositivo.'
-        )
+      } catch (err) {
+        if (
+          err.name === 'NotAllowedError' ||
+          err.name === 'PermissionDeniedError'
+        ) {
+          setErrorCamara(
+            'Permiso denegado. Permite el acceso a la cámara en las opciones de tu navegador.'
+          )
+        } else {
+          setErrorCamara(
+            'No se pudo acceder a la cámara. Puedes subir una fotografía del código QR.'
+          )
+        }
       }
     }
 
     function detenerCamara() {
+      detenido = true
+      if (animFrameRef.current) {
+        cancelAnimationFrame(animFrameRef.current)
+        animFrameRef.current = null
+      }
       if (streamRef.current) {
         streamRef.current.getTracks().forEach((track) => track.stop())
         streamRef.current = null
       }
+      setEscaneando(false)
     }
 
     if (tabActiva === 'qr') {
@@ -231,7 +325,42 @@ export default function Validacion() {
     }
 
     return () => detenerCamara()
-  }, [tabActiva])
+  }, [tabActiva, procesarResultadoQR])
+
+  // Lector de archivos subidos por el usuario compatible con cualquier navegador
+  function handleSubirImagenQR(e) {
+    const archivo = e.target.files?.[0]
+    if (!archivo) return
+
+    setErrorCamara('')
+    const lector = new FileReader()
+
+    lector.onload = (eventoCarga) => {
+      const img = new Image()
+      img.onload = () => {
+        const canvas = document.createElement('canvas')
+        const ctx = canvas.getContext('2d', { willReadFrequently: true })
+
+        canvas.width = img.width
+        canvas.height = img.height
+        ctx.drawImage(img, 0, 0)
+
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+        const codigo = jsQR(imageData.data, imageData.width, imageData.height)
+
+        if (codigo && codigo.data) {
+          procesarResultadoQR(codigo.data)
+        } else {
+          setErrorCamara(
+            'No se detectó un código QR válido en la imagen. Asegúrate de que la foto sea nítida.'
+          )
+        }
+      }
+      img.src = eventoCarga.target.result
+    }
+
+    lector.readAsDataURL(archivo)
+  }
 
   async function handleBuscar(e) {
     e.preventDefault()
@@ -452,7 +581,7 @@ export default function Validacion() {
               aria-labelledby="tab-qr"
               className="p-6 sm:p-8 flex flex-col items-center"
             >
-              <div className="relative w-full max-w-sm aspect-square bg-black rounded-xl overflow-hidden mb-4 shadow-inner">
+              <div className="relative w-full max-w-sm aspect-square bg-slate-950 rounded-2xl overflow-hidden mb-5 shadow-lg border border-slate-800 flex items-center justify-center">
                 <video
                   ref={videoRef}
                   autoPlay
@@ -460,23 +589,50 @@ export default function Validacion() {
                   muted
                   className="w-full h-full object-cover"
                 />
-                <div className="absolute inset-8 border-2 border-dashed border-dorado rounded-xl pointer-events-none animate-pulse" />
+
+                {escaneando && (
+                  <div className="absolute inset-10 border-2 border-dashed border-dorado rounded-2xl pointer-events-none animate-pulse flex items-center justify-center">
+                    <span className="text-[11px] font-bold text-dorado bg-slate-900/80 px-3 py-1 rounded-full uppercase tracking-wider shadow-xs">
+                      Enfocando QR...
+                    </span>
+                  </div>
+                )}
               </div>
 
               {errorCamara && (
-                <p
+                <div
                   role="alert"
-                  className="text-sm text-red-600 text-center mb-2 font-medium"
+                  className="w-full max-w-sm text-xs sm:text-sm text-amber-900 bg-amber-50 border border-amber-200 p-3.5 rounded-xl mb-4 text-center leading-relaxed"
                 >
                   {errorCamara}
-                </p>
+                </div>
               )}
 
-              <p className="text-xs text-slate-500 text-center flex items-center gap-1.5">
-                <Camera className="w-4 h-4 text-slate-400" aria-hidden="true" />
-                Apunta la cámara del dispositivo directamente al código QR del
-                documento.
-              </p>
+              {/* Selector de archivo universal */}
+              <div className="w-full max-w-sm border-t border-slate-200 pt-4 flex flex-col items-center gap-3">
+                <label className="min-h-[44px] w-full flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs sm:text-sm font-bold py-2.5 px-4 rounded-xl cursor-pointer transition focus-within:ring-2 focus-within:ring-[#1b3a6b]">
+                  <Upload
+                    className="w-4 h-4 text-slate-600"
+                    aria-hidden="true"
+                  />
+                  <span>Subir imagen o foto del QR</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleSubirImagenQR}
+                    className="sr-only"
+                  />
+                </label>
+
+                <p className="text-xs text-slate-500 text-center flex items-center gap-1.5">
+                  <Camera
+                    className="w-3.5 h-3.5 text-slate-400 shrink-0"
+                    aria-hidden="true"
+                  />
+                  Compatible con fotos de constancias tomadas desde cualquier
+                  móvil o PC.
+                </p>
+              </div>
             </div>
           )}
         </div>
