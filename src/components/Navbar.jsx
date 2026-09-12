@@ -36,7 +36,7 @@ export default function Navbar() {
   ]
 
   return (
-    <header className="bg-crema border-b border-slate-200/80 shadow-sm w-full relative z-40">
+    <header className="bg-crema border-b border-slate-200/80 shadow-xs w-full relative z-40">
       <nav
         aria-label="Navegación principal"
         className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
@@ -67,36 +67,47 @@ export default function Navbar() {
               ))}
             </ul>
 
-            {token ? (
-              <div className="flex items-center gap-3 ml-2 border-l border-slate-300 pl-4">
+            <div className="border-l border-slate-300 pl-4 ml-1">
+              {token ? (
+                <div className="flex items-center gap-2.5">
+                  <Link
+                    to="/admin"
+                    className="min-h-[44px] inline-flex items-center gap-2 bg-[#1b3a6b] text-white hover:bg-[#142c52] px-3.5 py-2 rounded-lg text-sm font-bold transition-all shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1b3a6b]"
+                  >
+                    <LayoutDashboard
+                      className="w-4 h-4 text-dorado"
+                      aria-hidden="true"
+                    />
+                    <span>Panel Admin</span>
+                  </Link>
+
+                  <button
+                    type="button"
+                    onClick={handleLogout}
+                    title="Cerrar sesión"
+                    aria-label="Cerrar sesión de administrador"
+                    className="min-h-[44px] inline-flex items-center gap-1.5 text-xs font-bold text-red-700 bg-red-50 hover:bg-red-100/90 px-3 py-2 rounded-lg transition-colors border border-red-200/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-600"
+                  >
+                    <LogOut
+                      className="w-4 h-4 text-red-600"
+                      aria-hidden="true"
+                    />
+                    <span>Salir</span>
+                  </button>
+                </div>
+              ) : (
                 <Link
-                  to="/admin"
-                  className="min-h-[44px] inline-flex items-center gap-2 text-sm font-bold text-guinda hover:text-guinda/80 px-3 py-2 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-guinda"
+                  to="/login"
+                  className="min-h-[44px] inline-flex items-center gap-2 bg-dorado text-slate-950 font-bold text-sm rounded-lg px-4 py-2 hover:brightness-95 transition-all shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900"
                 >
-                  <LayoutDashboard className="w-4 h-4" aria-hidden="true" />
-                  <span>Panel Admin</span>
+                  <LogIn className="w-4 h-4" aria-hidden="true" />
+                  <span>Iniciar sesión</span>
                 </Link>
-                <button
-                  type="button"
-                  onClick={handleLogout}
-                  className="min-h-[44px] inline-flex items-center gap-2 bg-red-100/80 text-red-800 hover:bg-red-200/90 px-3.5 py-2 rounded-lg text-sm font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-600"
-                >
-                  <LogOut className="w-4 h-4" aria-hidden="true" />
-                  <span>Cerrar sesión</span>
-                </button>
-              </div>
-            ) : (
-              <Link
-                to="/login"
-                className="min-h-[44px] inline-flex items-center gap-2 bg-dorado text-slate-950 font-bold text-sm rounded-lg px-4 py-2 hover:brightness-95 transition-all shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900"
-              >
-                <LogIn className="w-4 h-4" aria-hidden="true" />
-                <span>Iniciar sesión</span>
-              </Link>
-            )}
+              )}
+            </div>
           </div>
 
-          {/* Botón hamburguesa móvil con tamaño táctil accesible (44x44 px) */}
+          {/* Botón hamburguesa móvil */}
           <button
             type="button"
             onClick={() => setMenuOpen(true)}
@@ -110,7 +121,7 @@ export default function Navbar() {
         </div>
       </nav>
 
-      {/* Overlay móvil accesible */}
+      {/* Overlay móvil */}
       {menuOpen && (
         <div
           onClick={() => setMenuOpen(false)}
@@ -169,22 +180,26 @@ export default function Navbar() {
 
             <li className="pt-4 border-t border-slate-200 mt-2">
               {token ? (
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col gap-2.5">
                   <Link
                     to="/admin"
                     onClick={() => setMenuOpen(false)}
-                    className="min-h-[48px] flex items-center gap-3 text-sm font-bold text-guinda bg-slate-100/90 rounded-xl px-4 py-3 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-guinda"
+                    className="min-h-[48px] flex items-center justify-center gap-2.5 text-sm font-bold text-white bg-[#1b3a6b] hover:bg-[#142c52] rounded-xl px-4 py-3 transition-all shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1b3a6b]"
                   >
-                    <LayoutDashboard className="w-5 h-5" aria-hidden="true" />
+                    <LayoutDashboard
+                      className="w-5 h-5 text-dorado"
+                      aria-hidden="true"
+                    />
                     <span>Panel de Control</span>
                   </Link>
+
                   <button
                     type="button"
                     onClick={handleLogout}
-                    className="min-h-[48px] w-full flex items-center gap-3 text-sm font-bold text-red-800 bg-red-100/70 hover:bg-red-200/80 rounded-xl px-4 py-3 transition-colors text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-700"
+                    className="min-h-[48px] w-full flex items-center justify-center gap-2 text-sm font-bold text-red-800 bg-red-100/80 hover:bg-red-200/90 rounded-xl px-4 py-3 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-600"
                   >
                     <LogOut
-                      className="w-5 h-5 text-red-700"
+                      className="w-4 h-4 text-red-700"
                       aria-hidden="true"
                     />
                     <span>Cerrar sesión</span>
@@ -194,7 +209,7 @@ export default function Navbar() {
                 <Link
                   to="/login"
                   onClick={() => setMenuOpen(false)}
-                  className="min-h-[48px] flex items-center justify-center gap-2 bg-dorado text-slate-950 font-bold text-sm rounded-xl px-4 py-3 hover:brightness-95 transition-all shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900"
+                  className="min-h-[48px] flex items-center justify-center gap-2 bg-dorado text-slate-950 font-bold text-sm rounded-xl px-4 py-3 hover:brightness-95 transition-all shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900"
                 >
                   <LogIn className="w-5 h-5" aria-hidden="true" />
                   <span>Iniciar sesión</span>
