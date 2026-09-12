@@ -26,6 +26,163 @@ function formatearFecha(fechaStr) {
   return `${dia}/${mes}/${anio}`
 }
 
+function TarjetaCertificadoOficial({ cert, alumnoActivo = true, fechaHoy }) {
+  const tieneVig = Boolean(cert.tiene_vigencia)
+  const fechaExp = cert.fecha_vigencia
+  const esExpirado = tieneVig && fechaExp && fechaExp < fechaHoy
+  const alumnoDadoDeBaja =
+    cert.alumno_activo === false || alumnoActivo === false
+  const esValido = cert.valido !== false && !esExpirado && !alumnoDadoDeBaja
+  const folioMostrar = cert.folio_manual || cert.folio || 'N/A'
+
+  return (
+    <article className="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden transition hover:shadow-2xl">
+      <div
+        className={`p-6 text-white text-center transition-colors ${
+          esValido ? 'bg-[#1b3a6b]' : 'bg-red-800'
+        }`}
+      >
+        {esValido ? (
+          <>
+            <CheckCircle2
+              className="w-14 h-14 mx-auto mb-2 text-dorado"
+              aria-hidden="true"
+            />
+            <h3 className="text-xl font-bold tracking-tight">
+              Certificado Oficial Auténtico
+            </h3>
+            <p className="text-xs uppercase tracking-widest text-crema/90 mt-1 font-mono">
+              Folio: {folioMostrar}
+            </p>
+          </>
+        ) : (
+          <>
+            <XCircle
+              className="w-14 h-14 mx-auto mb-2 text-red-200"
+              aria-hidden="true"
+            />
+            <h3 className="text-xl font-bold tracking-tight">
+              {alumnoDadoDeBaja
+                ? 'Documento Inhabilitado (Baja Institucional)'
+                : esExpirado
+                  ? 'Certificado Vencido o Expirado'
+                  : 'Certificado Revocado o No Válido'}
+            </h3>
+            <p className="text-xs uppercase tracking-widest text-red-200 mt-1 font-mono">
+              Folio: {folioMostrar}
+            </p>
+          </>
+        )}
+      </div>
+
+      <div className="p-6 space-y-4">
+        <div className="border-b border-slate-100 pb-3">
+          <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
+            Acreditado a
+          </span>
+          <div className="flex items-center gap-2 text-base font-bold text-slate-900">
+            <User className="w-4 h-4 text-dorado shrink-0" aria-hidden="true" />
+            <span>{cert.alumno_nombre}</span>
+          </div>
+        </div>
+
+        <div className="border-b border-slate-100 pb-3">
+          <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
+            Programa Académico
+          </span>
+          <div className="flex items-center gap-2 text-base font-bold text-[#1b3a6b]">
+            <Award
+              className="w-4 h-4 text-dorado shrink-0"
+              aria-hidden="true"
+            />
+            <span>{cert.curso_nombre}</span>
+          </div>
+        </div>
+
+        <div className="border-b border-slate-100 pb-3">
+          <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
+            Instructor / Evaluador
+          </span>
+          <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+            <UserCheck
+              className="w-4 h-4 text-slate-400 shrink-0"
+              aria-hidden="true"
+            />
+            <span>{cert.instructor}</span>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4 border-b border-slate-100 pb-3">
+          <div>
+            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
+              Duración Curricular
+            </span>
+            <div className="flex items-center gap-1.5 text-sm text-slate-700 font-medium">
+              <Clock
+                className="w-4 h-4 text-slate-400 shrink-0"
+                aria-hidden="true"
+              />
+              <span>{cert.duracion_horas} horas</span>
+            </div>
+          </div>
+          <div>
+            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
+              Fecha de Emisión
+            </span>
+            <div className="flex items-center gap-1.5 text-sm text-slate-700 font-medium">
+              <Calendar
+                className="w-4 h-4 text-slate-400 shrink-0"
+                aria-hidden="true"
+              />
+              <span>{formatearFecha(cert.fecha_emision)}</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="pt-1">
+          {tieneVig ? (
+            esValido ? (
+              <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 p-3 rounded-xl flex items-center justify-center gap-2 text-sm font-semibold">
+                <ShieldCheck
+                  className="w-4 h-4 text-emerald-600 shrink-0"
+                  aria-hidden="true"
+                />
+                <span>Vigente hasta el {formatearFecha(fechaExp)}</span>
+              </div>
+            ) : (
+              <div className="bg-red-50 border border-red-200 text-red-700 p-3 rounded-xl flex items-center justify-center gap-2 text-sm font-semibold">
+                <ShieldAlert
+                  className="w-4 h-4 text-red-600 shrink-0"
+                  aria-hidden="true"
+                />
+                <span>Expiró el {formatearFecha(fechaExp)}</span>
+              </div>
+            )
+          ) : (
+            <div className="bg-slate-50 border border-slate-200 text-slate-700 p-3 rounded-xl text-center text-sm font-medium">
+              Vigencia: <strong>Permanente / Sin caducidad</strong>
+            </div>
+          )}
+        </div>
+
+        {cert.token_publico && (
+          <div className="pt-2 text-center">
+            <a
+              href={`/validar/${cert.token_publico}`}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-700 hover:text-blue-900 hover:underline transition py-1"
+            >
+              <ExternalLink className="w-3.5 h-3.5" aria-hidden="true" />
+              <span>Abrir vista directa con Código QR</span>
+            </a>
+          </div>
+        )}
+      </div>
+    </article>
+  )
+}
+
 export default function Validacion() {
   const [tabActiva, setTabActiva] = useState('manual')
   const [metodoBusqueda, setMetodoBusqueda] = useState('folio')
@@ -55,7 +212,7 @@ export default function Validacion() {
         setErrorCamara('')
       } catch {
         setErrorCamara(
-          'No se pudo acceder a la cámara. Verifica los permisos de tu navegador o dispositivo.'
+          'No se pudo acceder a la cámara. Verifica los permisos de tu dispositivo.'
         )
       }
     }
@@ -96,12 +253,9 @@ export default function Validacion() {
         )
       }
 
-      // NORMALIZADOR: detecta qué estructura devolvió el backend
       if (data.certificados && Array.isArray(data.certificados)) {
-        // Estructura nueva (BusquedaPublicaResponse)
         setDatosRespuesta(data)
       } else if (Array.isArray(data)) {
-        // En caso de array directo
         setDatosRespuesta({
           tipo_consulta: metodoBusqueda,
           alumno: data[0]
@@ -114,7 +268,6 @@ export default function Validacion() {
           certificados: data,
         })
       } else {
-        // Estructura clásica (objeto Certificado único)
         setDatosRespuesta({
           tipo_consulta: 'folio',
           alumno: {
@@ -132,14 +285,13 @@ export default function Validacion() {
     }
   }
 
+  const esBusquedaCurp = datosRespuesta?.tipo_consulta === 'curp'
   const alumnoInfo = datosRespuesta?.alumno
   const certificadosList = datosRespuesta?.certificados || []
-  const esBajaInstitucional = alumnoInfo && alumnoInfo.activo === false
 
   return (
     <main className="bg-slate-50 min-h-screen py-12 sm:py-16">
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Encabezado */}
+      <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
         <header className="text-center mb-10">
           <h1 className="text-2xl sm:text-3xl font-bold text-[#1b3a6b] mb-2 tracking-tight">
             Validación de Cursos y Certificados
@@ -150,7 +302,6 @@ export default function Validacion() {
           </p>
         </header>
 
-        {/* Caja de Búsqueda */}
         <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden mb-8">
           <div
             role="tablist"
@@ -330,7 +481,6 @@ export default function Validacion() {
           )}
         </div>
 
-        {/* Mensaje de Error */}
         {errorBusqueda && (
           <aside
             role="alert"
@@ -344,256 +494,93 @@ export default function Validacion() {
           </aside>
         )}
 
-        {/* ===================== RESULTADOS DE BÚSQUEDA ===================== */}
         {datosRespuesta && (
           <section aria-labelledby="resultado-titulo" className="space-y-6">
-            {/* Cabecera del Alumno */}
-            {alumnoInfo && (
-              <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div>
-                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">
-                    Expediente del Titular
-                  </span>
-                  <h2
-                    id="resultado-titulo"
-                    className="text-lg font-bold text-slate-900 flex items-center gap-2"
-                  >
-                    <User
-                      className="w-5 h-5 text-dorado shrink-0"
-                      aria-hidden="true"
-                    />
-                    {alumnoInfo.nombre}
-                  </h2>
-                  {alumnoInfo.curp && (
-                    <p className="text-xs font-mono text-slate-500 mt-0.5">
-                      CURP: {alumnoInfo.curp}
-                    </p>
-                  )}
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <span
-                    className={`text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1.5 ${
-                      alumnoInfo.activo !== false
-                        ? 'bg-emerald-100 text-emerald-800'
-                        : 'bg-red-100 text-red-800'
-                    }`}
-                  >
-                    {alumnoInfo.activo !== false ? (
-                      <>
-                        <CheckCircle2
-                          className="w-3.5 h-3.5"
+            {esBusquedaCurp ? (
+              <>
+                {alumnoInfo && (
+                  <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div>
+                      <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">
+                        Expediente del Titular
+                      </span>
+                      <h2
+                        id="resultado-titulo"
+                        className="text-lg font-bold text-slate-900 flex items-center gap-2"
+                      >
+                        <User
+                          className="w-5 h-5 text-dorado shrink-0"
                           aria-hidden="true"
                         />
-                        Padrón Activo
-                      </>
-                    ) : (
-                      <>
-                        <ShieldAlert
-                          className="w-3.5 h-3.5"
-                          aria-hidden="true"
-                        />
-                        Baja Institucional
-                      </>
-                    )}
-                  </span>
-                  <span className="text-xs font-medium text-slate-500 bg-slate-100 px-2.5 py-1 rounded-full">
-                    {certificadosList.length}{' '}
-                    {certificadosList.length === 1
-                      ? 'constancia'
-                      : 'constancias'}
-                  </span>
-                </div>
-              </div>
-            )}
+                        {alumnoInfo.nombre}
+                      </h2>
+                      {alumnoInfo.curp && (
+                        <p className="text-xs font-mono text-slate-500 mt-0.5">
+                          CURP: {alumnoInfo.curp}
+                        </p>
+                      )}
+                    </div>
 
-            {/* Alerta de Baja */}
-            {esBajaInstitucional && (
-              <div className="bg-red-50 border-l-4 border-red-600 p-4 rounded-r-xl">
-                <div className="flex items-center gap-2 text-red-800 font-bold text-sm mb-1">
-                  <ShieldAlert
-                    className="w-4 h-4 text-red-600 shrink-0"
-                    aria-hidden="true"
-                  />
-                  REGISTROS ACADÉMICOS INHABILITADOS
-                </div>
-                <p className="text-xs text-red-700 leading-relaxed">
-                  Las certificaciones mostradas a continuación no cuentan con
-                  validez oficial activa debido a que el titular ha causado baja
-                  del sistema institucional.
-                </p>
-              </div>
-            )}
-
-            {/* Listado de Certificados */}
-            <div className="space-y-4">
-              {certificadosList.length === 0 ? (
-                <div className="bg-white p-8 text-center rounded-xl border border-slate-200 text-slate-500 text-sm">
-                  No se encontraron cursos o certificados asociados a este
-                  registro.
-                </div>
-              ) : (
-                certificadosList.map((cert, index) => {
-                  const tieneVig = Boolean(cert.tiene_vigencia)
-                  const fechaExp = cert.fecha_vigencia
-                  const esExpirado = tieneVig && fechaExp && fechaExp < fechaHoy
-                  const esValido =
-                    cert.valido !== false && !esExpirado && !esBajaInstitucional
-                  const folioMostrar = cert.folio_manual || cert.folio || 'N/A'
-
-                  return (
-                    <article
-                      key={cert.id || cert.token_publico || index}
-                      className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden transition hover:shadow-md"
-                    >
-                      <div
-                        className={`px-6 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-white ${
-                          esValido ? 'bg-[#1b3a6b]' : 'bg-red-800'
+                    <div className="flex items-center gap-2">
+                      <span
+                        className={`text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1.5 ${
+                          alumnoInfo.activo !== false
+                            ? 'bg-emerald-100 text-emerald-800'
+                            : 'bg-red-100 text-red-800'
                         }`}
                       >
-                        <div className="flex items-center gap-2.5">
-                          {esValido ? (
+                        {alumnoInfo.activo !== false ? (
+                          <>
                             <CheckCircle2
-                              className="w-5 h-5 text-dorado shrink-0"
+                              className="w-3.5 h-3.5"
                               aria-hidden="true"
                             />
-                          ) : (
-                            <XCircle
-                              className="w-5 h-5 text-red-200 shrink-0"
+                            Padrón Activo
+                          </>
+                        ) : (
+                          <>
+                            <ShieldAlert
+                              className="w-3.5 h-3.5"
                               aria-hidden="true"
                             />
-                          )}
-                          <div>
-                            <h3 className="text-sm font-bold tracking-wide">
-                              {esValido
-                                ? 'Documento Oficial Acreditado'
-                                : 'Documento Sin Validez Vigente'}
-                            </h3>
-                            <p className="text-[11px] font-mono opacity-80">
-                              Folio: {folioMostrar}
-                            </p>
-                          </div>
-                        </div>
+                            Baja Institucional
+                          </>
+                        )}
+                      </span>
+                      <span className="text-xs font-semibold text-slate-600 bg-slate-100 px-2.5 py-1 rounded-full">
+                        {certificadosList.length}{' '}
+                        {certificadosList.length === 1
+                          ? 'constancia'
+                          : 'constancias'}
+                      </span>
+                    </div>
+                  </div>
+                )}
 
-                        <span
-                          className={`self-start sm:self-center text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider ${
-                            !tieneVig
-                              ? 'bg-blue-100 text-[#1b3a6b]'
-                              : esExpirado || !esValido
-                                ? 'bg-red-200 text-red-900'
-                                : 'bg-emerald-100 text-emerald-900'
-                          }`}
-                        >
-                          {!tieneVig
-                            ? 'Permanente'
-                            : esExpirado
-                              ? 'Expirado'
-                              : 'Vigente'}
-                        </span>
-                      </div>
-
-                      <div className="p-6 space-y-4">
-                        <div>
-                          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">
-                            Programa Académico
-                          </span>
-                          <p className="text-base font-bold text-[#1b3a6b] flex items-center gap-2">
-                            <Award
-                              className="w-4 h-4 text-dorado shrink-0"
-                              aria-hidden="true"
-                            />
-                            {cert.curso_nombre}
-                          </p>
-                        </div>
-
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 border-t border-slate-100 pt-3 text-xs text-slate-600">
-                          <div>
-                            <span className="font-semibold text-slate-400 block mb-0.5">
-                              Evaluador / Emisor:
-                            </span>
-                            <div className="flex items-center gap-1.5 font-medium text-slate-800">
-                              <UserCheck
-                                className="w-3.5 h-3.5 text-slate-400"
-                                aria-hidden="true"
-                              />
-                              <span>{cert.instructor}</span>
-                            </div>
-                          </div>
-
-                          <div>
-                            <span className="font-semibold text-slate-400 block mb-0.5">
-                              Duración Curricular:
-                            </span>
-                            <div className="flex items-center gap-1.5 font-medium text-slate-800">
-                              <Clock
-                                className="w-3.5 h-3.5 text-slate-400"
-                                aria-hidden="true"
-                              />
-                              <span>{cert.duracion_horas} horas</span>
-                            </div>
-                          </div>
-
-                          <div>
-                            <span className="font-semibold text-slate-400 block mb-0.5">
-                              Fecha de Emisión:
-                            </span>
-                            <div className="flex items-center gap-1.5 font-medium text-slate-800">
-                              <Calendar
-                                className="w-3.5 h-3.5 text-slate-400"
-                                aria-hidden="true"
-                              />
-                              <span>{formatearFecha(cert.fecha_emision)}</span>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="border-t border-slate-100 pt-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                          <div className="text-xs">
-                            {tieneVig ? (
-                              esExpirado ? (
-                                <span className="text-red-700 font-medium">
-                                  Caducó el:{' '}
-                                  <strong>{formatearFecha(fechaExp)}</strong>
-                                </span>
-                              ) : (
-                                <span className="text-emerald-700 font-medium flex items-center gap-1">
-                                  <ShieldCheck
-                                    className="w-3.5 h-3.5"
-                                    aria-hidden="true"
-                                  />
-                                  Vigente hasta el:{' '}
-                                  <strong>{formatearFecha(fechaExp)}</strong>
-                                </span>
-                              )
-                            ) : (
-                              <span className="text-slate-500 font-medium">
-                                Vigencia:{' '}
-                                <strong>Permanente (Sin expiración)</strong>
-                              </span>
-                            )}
-                          </div>
-
-                          {cert.token_publico && (
-                            <a
-                              href={`/validar/${cert.token_publico}`}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="min-h-[44px] inline-flex items-center gap-1.5 text-xs font-semibold text-blue-700 hover:text-blue-900 transition py-1 self-end sm:self-auto"
-                            >
-                              <ExternalLink
-                                className="w-3.5 h-3.5"
-                                aria-hidden="true"
-                              />
-                              <span>Ver Certificado Oficial</span>
-                            </a>
-                          )}
-                        </div>
-                      </div>
-                    </article>
-                  )
-                })
-              )}
-            </div>
+                <div className="space-y-6">
+                  {certificadosList.map((cert, index) => (
+                    <TarjetaCertificadoOficial
+                      key={cert.id || cert.token_publico || index}
+                      cert={cert}
+                      alumnoActivo={alumnoInfo?.activo !== false}
+                      fechaHoy={fechaHoy}
+                    />
+                  ))}
+                </div>
+              </>
+            ) : (
+              certificadosList[0] && (
+                <TarjetaCertificadoOficial
+                  cert={certificadosList[0]}
+                  alumnoActivo={
+                    alumnoInfo
+                      ? alumnoInfo.activo !== false
+                      : certificadosList[0].alumno_activo !== false
+                  }
+                  fechaHoy={fechaHoy}
+                />
+              )
+            )}
           </section>
         )}
       </div>
