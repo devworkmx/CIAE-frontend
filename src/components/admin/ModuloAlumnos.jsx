@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react'
-import { API_URL, getAuthHeaders } from '../../services/api'
+import { API_URL, getJsonHeaders } from '../../services/api'
 import Paginacion from './Paginacion'
 import {
   Plus,
@@ -14,6 +14,15 @@ import {
   Mail,
   Fingerprint,
 } from 'lucide-react'
+
+// Formato oficial de CURP: 4 letras + 6 dígitos (fecha) + H/M + 5 letras
+// (estado + consonantes internas) + 2 alfanuméricos + 1 dígito verificador.
+const CURP_REGEX =
+  /^[A-Z][AEIOUX][A-Z]{2}\d{2}(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])[HM](AS|BC|BS|CC|CS|CH|CL|CM|DF|DG|GT|GR|HG|JC|MC|MN|MS|NT|NL|OC|PL|QO|QR|SP|SL|SR|TC|TS|TL|VZ|YN|ZS|NE)[B-DF-HJ-NP-TV-Z]{3}[A-Z\d]\d$/
+
+function validarCURP(curp) {
+  return typeof curp === 'string' && CURP_REGEX.test(curp.trim().toUpperCase())
+}
 
 export default function ModuloAlumnos({
   alumnos,
@@ -46,9 +55,20 @@ export default function ModuloAlumnos({
     email: '',
     telefono: '',
   })
+  const [errorCurp, setErrorCurp] = useState('')
 
   async function guardarAlumno(e) {
     e.preventDefault()
+
+    const curpLimpia = form.curp.trim().toUpperCase()
+    if (!validarCURP(curpLimpia)) {
+      setErrorCurp(
+        'CURP inválida. Debe tener 18 caracteres con el formato oficial (ej. PEGC900101HDFRNR09).'
+      )
+      return
+    }
+    setErrorCurp('')
+
     const body = {
       ...form,
       curp: form.curp.trim().toUpperCase(),
@@ -64,7 +84,8 @@ export default function ModuloAlumnos({
     try {
       const res = await fetch(endpoint, {
         method,
-        headers: getAuthHeaders(),
+        headers: getJsonHeaders(),
+        credentials: 'include',
         body: JSON.stringify(body),
       })
       if (res.ok) {
@@ -99,6 +120,7 @@ export default function ModuloAlumnos({
   function cancelarEdicion() {
     setEditandoId(null)
     setForm({ nombre: '', apellidos: '', curp: '', email: '', telefono: '' })
+    setErrorCurp('')
   }
 
   async function ejecutarCambioEstado(e) {
@@ -117,7 +139,8 @@ export default function ModuloAlumnos({
     try {
       const res = await fetch(`${API_URL}/api/alumnos/${alumno.id}/estado`, {
         method: 'PATCH',
-        headers: getAuthHeaders(),
+        headers: getJsonHeaders(),
+        credentials: 'include',
         body: JSON.stringify({ activo: nuevoEstado, admin_password: password }),
       })
       if (res.ok) {
@@ -258,11 +281,25 @@ export default function ModuloAlumnos({
               maxLength={18}
               placeholder="PEGC900101HDFRNR09"
               value={form.curp}
-              onChange={(e) =>
+              aria-invalid={errorCurp ? 'true' : 'false'}
+              aria-describedby={errorCurp ? 'alumno_curp_error' : undefined}
+              onChange={(e) => {
                 setForm({ ...form, curp: e.target.value.toUpperCase() })
-              }
-              className="w-full border rounded-lg p-2.5 text-sm uppercase font-mono outline-none focus:border-[#1b3a6b]"
+                if (errorCurp) setErrorCurp('')
+              }}
+              className={`w-full border rounded-lg p-2.5 text-sm uppercase font-mono outline-none focus:border-[#1b3a6b] ${
+                errorCurp ? 'border-red-400 focus:border-red-500' : ''
+              }`}
             />
+            {errorCurp && (
+              <p
+                id="alumno_curp_error"
+                role="alert"
+                className="mt-1 text-xs text-red-700 font-medium"
+              >
+                {errorCurp}
+              </p>
+            )}
           </div>
 
           <div>

@@ -8,6 +8,7 @@ import {
 } from 'react-router-dom'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
+import { cerrarSesion } from './services/api'
 
 import Home from './pages/Home'
 import Contact from './pages/Contact'
@@ -40,8 +41,8 @@ function LayoutPublico() {
 function LayoutAdmin() {
   const navigate = useNavigate()
 
-  const handleLogout = () => {
-    localStorage.removeItem('ciae_token')
+  const handleLogout = async () => {
+    await cerrarSesion()
     navigate('/login')
   }
 

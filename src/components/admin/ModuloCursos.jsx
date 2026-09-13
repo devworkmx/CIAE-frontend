@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react'
-import { API_URL, getAuthHeaders } from '../../services/api'
+import { API_URL, getJsonHeaders } from '../../services/api'
 import Paginacion from './Paginacion'
 import {
   Plus,
@@ -55,7 +55,8 @@ export default function ModuloCursos({
     try {
       const res = await fetch(endpoint, {
         method,
-        headers: getAuthHeaders(),
+        headers: getJsonHeaders(),
+        credentials: 'include',
         body: JSON.stringify(body),
       })
       if (res.ok) {

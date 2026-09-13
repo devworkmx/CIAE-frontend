@@ -41,6 +41,7 @@ export default function Login() {
       const res = await fetch(`${API_URL}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        credentials: 'include', // necesario para que el navegador acepte y guarde la cookie httpOnly
         body,
       })
 
@@ -49,8 +50,8 @@ export default function Login() {
         return
       }
 
-      const data = await res.json()
-      localStorage.setItem('ciae_token', data.access_token)
+      // El backend ya dejó la cookie httpOnly de sesión; no hay nada que
+      // guardar manualmente en el frontend.
       navigate('/admin')
     } catch {
       setError('No fue posible conectar con el servidor.')

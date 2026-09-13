@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { verificarSesion, cerrarSesion } from '../services/api'
 import {
   Landmark,
   Menu,
@@ -14,13 +15,22 @@ import {
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false)
+  const [sesionActiva, setSesionActiva] = useState(false)
   const navigate = useNavigate()
 
-  const token =
-    typeof window !== 'undefined' ? localStorage.getItem('ciae_token') : null
+  useEffect(() => {
+    let cancelado = false
+    verificarSesion().then((usuario) => {
+      if (!cancelado) setSesionActiva(Boolean(usuario))
+    })
+    return () => {
+      cancelado = true
+    }
+  }, [])
 
-  const handleLogout = () => {
-    localStorage.removeItem('ciae_token')
+  const handleLogout = async () => {
+    await cerrarSesion()
+    setSesionActiva(false)
     setMenuOpen(false)
     navigate('/login')
   }
@@ -68,7 +78,7 @@ export default function Navbar() {
             </ul>
 
             <div className="border-l border-slate-300 pl-4 ml-1">
-              {token ? (
+              {sesionActiva ? (
                 <div className="flex items-center gap-2.5">
                   <Link
                     to="/admin"
@@ -179,7 +189,7 @@ export default function Navbar() {
             })}
 
             <li className="pt-4 border-t border-slate-200 mt-2">
-              {token ? (
+              {sesionActiva ? (
                 <div className="flex flex-col gap-2.5">
                   <Link
                     to="/admin"

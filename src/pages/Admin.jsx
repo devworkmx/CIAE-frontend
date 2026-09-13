@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { API_URL, getAuthHeaders } from '../services/api'
+import { API_URL } from '../services/api'
 import ModuloCertificados from '../components/admin/ModuloCertificados'
 import ModuloAlumnos from '../components/admin/ModuloAlumnos'
 import ModuloCursos from '../components/admin/ModuloCursos'
@@ -36,18 +36,16 @@ export default function Admin() {
   }, [])
 
   const cargarDatos = useCallback(async () => {
-    const token = localStorage.getItem('ciae_token')
-    if (!token) {
-      navigate('/login')
-      return
-    }
-
+    // Ya no hay token que leer en localStorage: RutaProtegida (App.jsx) ya
+    // confirmó con el backend que hay sesión antes de mostrar esta página.
+    // Aun así, seguimos revisando 401 aquí abajo por si la sesión expira
+    // mientras el usuario ya está viendo el panel.
     setCargando(true)
     try {
       const [resCursos, resAlumnos, resCerts] = await Promise.all([
-        fetch(`${API_URL}/api/cursos`, { headers: getAuthHeaders() }),
-        fetch(`${API_URL}/api/alumnos`, { headers: getAuthHeaders() }),
-        fetch(`${API_URL}/api/certificados`, { headers: getAuthHeaders() }),
+        fetch(`${API_URL}/api/cursos`, { credentials: 'include' }),
+        fetch(`${API_URL}/api/alumnos`, { credentials: 'include' }),
+        fetch(`${API_URL}/api/certificados`, { credentials: 'include' }),
       ])
 
       if (
@@ -55,7 +53,6 @@ export default function Admin() {
         resAlumnos.status === 401 ||
         resCerts.status === 401
       ) {
-        localStorage.removeItem('ciae_token')
         navigate('/login')
         return
       }

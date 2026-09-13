@@ -1,5 +1,5 @@
 import { useState, useMemo, useRef, useEffect } from 'react'
-import { API_URL, getAuthHeaders } from '../../services/api'
+import { API_URL, getJsonHeaders } from '../../services/api'
 import Paginacion from './Paginacion'
 import {
   Plus,
@@ -232,7 +232,8 @@ export default function ModuloCertificados({
     try {
       const res = await fetch(endpoint, {
         method,
-        headers: getAuthHeaders(),
+        headers: getJsonHeaders(),
+        credentials: 'include',
         body: JSON.stringify(body),
       })
       if (res.ok) {
@@ -287,7 +288,8 @@ export default function ModuloCertificados({
       const res = await fetch(
         `${API_URL}/api/certificados/${certId}/qr?base_url=${currentOrigin}`,
         {
-          headers: getAuthHeaders(),
+          headers: getJsonHeaders(),
+          credentials: 'include',
         }
       )
       if (!res.ok) throw new Error()
