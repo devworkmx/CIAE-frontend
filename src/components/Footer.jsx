@@ -8,7 +8,7 @@ function Footer() {
   const enlacesRapidos = [
     { to: '/validacion-cursos', label: 'Validación de cursos' },
     { to: '/nosotros', label: 'Sobre nosotros' },
-    { to: '/Contact', label: 'Contacto y soporte' },
+    { to: '/contacto', label: 'Contacto y soporte' },
   ]
 
   // Enlaces de políticas y normatividad institucional

@@ -246,7 +246,7 @@ export default function ModuloAlumnos({
         <div className="flex items-center justify-between mb-4">
           <h2
             id="form-alumno-title"
-            className="text-base font-bold text-[#1b3a6b] flex items-center gap-2"
+            className="text-base font-bold text-azulmarino flex items-center gap-2"
           >
             <Plus className="w-4 h-4" aria-hidden="true" />{' '}
             {editandoId ? 'Modificar Alumno' : 'Alta de Alumno'}
@@ -277,7 +277,7 @@ export default function ModuloAlumnos({
               placeholder="Ej. Juan Carlos"
               value={form.nombre}
               onChange={(e) => setForm({ ...form, nombre: e.target.value })}
-              className="w-full border rounded-lg p-2.5 text-sm outline-none focus:border-[#1b3a6b]"
+              className="w-full border rounded-lg p-2.5 text-sm outline-none focus:border-azulmarino"
             />
           </div>
 
@@ -299,7 +299,7 @@ export default function ModuloAlumnos({
               placeholder="Ej. Pérez González"
               value={form.apellidos}
               onChange={(e) => setForm({ ...form, apellidos: e.target.value })}
-              className="w-full border rounded-lg p-2.5 text-sm outline-none focus:border-[#1b3a6b]"
+              className="w-full border rounded-lg p-2.5 text-sm outline-none focus:border-azulmarino"
             />
           </div>
 
@@ -324,7 +324,7 @@ export default function ModuloAlumnos({
                 setForm({ ...form, curp: e.target.value.toUpperCase() })
                 if (errorCurp) setErrorCurp('')
               }}
-              className={`w-full border rounded-lg p-2.5 text-sm uppercase font-mono outline-none focus:border-[#1b3a6b] ${
+              className={`w-full border rounded-lg p-2.5 text-sm uppercase font-mono outline-none focus:border-azulmarino ${
                 errorCurp ? 'border-red-400 focus:border-red-500' : ''
               }`}
             />
@@ -352,7 +352,7 @@ export default function ModuloAlumnos({
               placeholder="ejemplo.alumno@institucion.mx"
               value={form.email}
               onChange={(e) => setForm({ ...form, email: e.target.value })}
-              className="w-full border rounded-lg p-2.5 text-sm outline-none focus:border-[#1b3a6b]"
+              className="w-full border rounded-lg p-2.5 text-sm outline-none focus:border-azulmarino"
             />
           </div>
 
@@ -374,14 +374,14 @@ export default function ModuloAlumnos({
                 const soloNums = e.target.value.replace(/\D/g, '')
                 setForm({ ...form, telefono: soloNums })
               }}
-              className="w-full border rounded-lg p-2.5 text-sm outline-none focus:border-[#1b3a6b]"
+              className="w-full border rounded-lg p-2.5 text-sm outline-none focus:border-azulmarino"
             />
           </div>
 
           <div className="pt-2 flex gap-3">
             <button
               type="submit"
-              className="flex-1 min-h-[44px] bg-[#1b3a6b] text-white py-2.5 px-4 rounded-lg font-bold text-sm hover:brightness-110 transition focus-visible:ring-2 focus-visible:ring-[#1b3a6b]"
+              className="flex-1 min-h-11 bg-azulmarino text-white py-2.5 px-4 rounded-lg font-bold text-sm hover:brightness-110 transition focus-visible:ring-2 focus-visible:ring-azulmarino"
             >
               {editandoId ? 'Guardar Cambios' : 'Registrar Alumno'}
             </button>
@@ -389,7 +389,7 @@ export default function ModuloAlumnos({
               <button
                 type="button"
                 onClick={cancelarEdicion}
-                className="min-h-[44px] px-4 py-2.5 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-slate-50 transition"
+                className="min-h-11 px-4 py-2.5 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-slate-50 transition"
               >
                 Cancelar
               </button>
@@ -418,7 +418,7 @@ export default function ModuloAlumnos({
               onChange={(e) => setBusqueda(e.target.value)}
               placeholder="Buscar por nombre, CURP o correo..."
               aria-label="Buscar alumnos"
-              className="w-full pl-9 pr-3 py-2.5 text-sm bg-white border border-slate-200 rounded-lg outline-none focus:border-[#1b3a6b]"
+              className="w-full pl-9 pr-3 py-2.5 text-sm bg-white border border-slate-200 rounded-lg outline-none focus:border-azulmarino"
             />
           </div>
 
@@ -432,9 +432,9 @@ export default function ModuloAlumnos({
                 key={filtro}
                 type="button"
                 onClick={() => setFiltroEstado(filtro)}
-                className={`min-h-[40px] px-3.5 py-1.5 text-xs font-semibold rounded-md capitalize transition focus-visible:ring-2 focus-visible:ring-[#1b3a6b] ${
+                className={`min-h-11 px-3.5 py-1.5 text-xs font-semibold rounded-md capitalize transition focus-visible:ring-2 focus-visible:ring-azulmarino ${
                   filtroEstado === filtro
-                    ? 'bg-[#1b3a6b] text-white shadow-sm'
+                    ? 'bg-azulmarino text-white shadow-sm'
                     : 'text-gray-700 hover:text-gray-900'
                 }`}
               >
@@ -448,7 +448,7 @@ export default function ModuloAlumnos({
                 setFiltroEstado('todos')
               }}
               aria-label="Limpiar filtros de alumnos"
-              className="min-h-[40px] min-w-[40px] flex items-center justify-center text-gray-500 hover:text-gray-800 rounded-md transition"
+              className="min-h-11 min-w-11 flex items-center justify-center text-gray-500 hover:text-gray-800 rounded-md transition"
             >
               <RotateCcw className="w-4 h-4" aria-hidden="true" />
             </button>
@@ -523,7 +523,7 @@ export default function ModuloAlumnos({
                         type="button"
                         onClick={() => setModalCursosAlumno(a)}
                         aria-label={`Ver certificados y cursos inscritos de ${a.nombre} ${a.apellidos}`}
-                        className="min-h-[44px] px-3.5 py-2 flex items-center gap-1.5 text-xs font-semibold rounded-lg border border-blue-200 text-blue-700 bg-blue-50/60 hover:bg-blue-100 transition focus-visible:ring-2 focus-visible:ring-[#1b3a6b]"
+                        className="min-h-11 px-3.5 py-2 flex items-center gap-1.5 text-xs font-semibold rounded-lg border border-blue-200 text-blue-700 bg-blue-50/60 hover:bg-blue-100 transition focus-visible:ring-2 focus-visible:ring-azulmarino"
                       >
                         <BookOpen className="w-4 h-4" aria-hidden="true" />
                         <span>Cursos ({countCursos})</span>
@@ -533,7 +533,7 @@ export default function ModuloAlumnos({
                         type="button"
                         onClick={() => iniciarEdicion(a)}
                         aria-label={`Editar expediente de ${a.nombre} ${a.apellidos}`}
-                        className="min-h-[44px] min-w-[44px] flex items-center justify-center text-gray-600 hover:text-[#1b3a6b] rounded-lg hover:bg-slate-100 transition focus-visible:ring-2 focus-visible:ring-[#1b3a6b]"
+                        className="min-h-11 min-w-11 flex items-center justify-center text-gray-600 hover:text-azulmarino rounded-lg hover:bg-slate-100 transition focus-visible:ring-2 focus-visible:ring-azulmarino"
                       >
                         <Edit2 className="w-4 h-4" aria-hidden="true" />
                       </button>
@@ -555,7 +555,7 @@ export default function ModuloAlumnos({
                             ? `Dar de baja institucional a ${a.nombre} ${a.apellidos}`
                             : `Reactivar en el padrón a ${a.nombre} ${a.apellidos}`
                         }
-                        className={`min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg transition focus-visible:ring-2 focus-visible:ring-[#1b3a6b] ${
+                        className={`min-h-11 min-w-11 flex items-center justify-center rounded-lg transition focus-visible:ring-2 focus-visible:ring-azulmarino ${
                           activo
                             ? 'text-red-600 hover:bg-red-50'
                             : 'text-emerald-700 hover:bg-emerald-50'
@@ -596,10 +596,10 @@ export default function ModuloAlumnos({
             <div className="flex items-center justify-between border-b pb-3">
               <div className="flex items-center gap-2">
                 <GraduationCap
-                  className="w-5 h-5 text-[#1b3a6b]"
+                  className="w-5 h-5 text-azulmarino"
                   aria-hidden="true"
                 />
-                <h3 className="font-bold text-[#1b3a6b] text-base">
+                <h3 className="font-bold text-azulmarino text-base">
                   Cursos y Certificados
                 </h3>
               </div>
@@ -607,7 +607,7 @@ export default function ModuloAlumnos({
                 type="button"
                 onClick={() => setModalCursosAlumno(null)}
                 aria-label="Cerrar ventana de cursos"
-                className="min-h-[44px] min-w-[44px] flex items-center justify-center text-gray-400 hover:text-gray-600 rounded-lg"
+                className="min-h-11 min-w-11 flex items-center justify-center text-gray-400 hover:text-gray-600 rounded-lg"
               >
                 <X className="w-5 h-5" aria-hidden="true" />
               </button>
@@ -654,7 +654,7 @@ export default function ModuloAlumnos({
             <button
               type="button"
               onClick={() => setModalCursosAlumno(null)}
-              className="w-full min-h-[44px] bg-slate-100 hover:bg-slate-200 text-gray-800 text-sm font-medium py-2 rounded-lg transition"
+              className="w-full min-h-11 bg-slate-100 hover:bg-slate-200 text-gray-800 text-sm font-medium py-2 rounded-lg transition"
             >
               Cerrar
             </button>
@@ -689,7 +689,7 @@ export default function ModuloAlumnos({
                   })
                 }
                 aria-label="Cerrar confirmación"
-                className="min-h-[44px] min-w-[44px] flex items-center justify-center text-gray-400 hover:text-gray-600 rounded-lg"
+                className="min-h-11 min-w-11 flex items-center justify-center text-gray-400 hover:text-gray-600 rounded-lg"
               >
                 <X className="w-5 h-5" aria-hidden="true" />
               </button>
@@ -726,7 +726,7 @@ export default function ModuloAlumnos({
                       error: '',
                     })
                   }
-                  className="w-full border border-gray-300 rounded-lg p-2.5 text-sm outline-none focus:border-[#1b3a6b]"
+                  className="w-full border border-gray-300 rounded-lg p-2.5 text-sm outline-none focus:border-azulmarino"
                 />
               </div>
               {confirmacionBaja.error && (
@@ -747,14 +747,14 @@ export default function ModuloAlumnos({
                       cargando: false,
                     })
                   }
-                  className="w-1/2 min-h-[44px] border border-gray-300 rounded-lg py-2.5 text-sm text-gray-700 hover:bg-slate-50 transition"
+                  className="w-1/2 min-h-11 border border-gray-300 rounded-lg py-2.5 text-sm text-gray-700 hover:bg-slate-50 transition"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={confirmacionBaja.cargando}
-                  className={`w-1/2 min-h-[44px] text-white rounded-lg py-2.5 text-sm font-semibold transition ${
+                  className={`w-1/2 min-h-11 text-white rounded-lg py-2.5 text-sm font-semibold transition ${
                     confirmacionBaja.nuevoEstado
                       ? 'bg-emerald-600 hover:bg-emerald-700'
                       : 'bg-red-600 hover:bg-red-700'

@@ -41,7 +41,7 @@ export default function Navbar() {
       label: 'Validación de cursos',
       icon: BadgeCheck,
     },
-    { to: '/contact', label: 'Contacto', icon: Mail },
+    { to: '/contacto', label: 'Contacto', icon: Mail },
     { to: '/nosotros', label: 'Nosotros', icon: Users },
   ]
 

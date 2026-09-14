@@ -42,7 +42,7 @@ function TarjetaCertificadoOficial({ cert, alumnoActivo = true, fechaHoy }) {
     <article className="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden transition hover:shadow-2xl">
       <div
         className={`p-6 text-white text-center transition-colors ${
-          esValido ? 'bg-[#1b3a6b]' : 'bg-red-800'
+          esValido ? 'bg-azulmarino' : 'bg-red-800'
         }`}
       >
         {esValido ? (
@@ -93,7 +93,7 @@ function TarjetaCertificadoOficial({ cert, alumnoActivo = true, fechaHoy }) {
           <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
             Programa Académico
           </span>
-          <div className="flex items-center gap-2 text-base font-bold text-[#1b3a6b]">
+          <div className="flex items-center gap-2 text-base font-bold text-azulmarino">
             <Award
               className="w-4 h-4 text-dorado shrink-0"
               aria-hidden="true"
@@ -422,7 +422,7 @@ export default function Validacion() {
     <main className="bg-slate-50 min-h-screen py-12 sm:py-16">
       <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
         <header className="text-center mb-10">
-          <h1 className="text-2xl sm:text-3xl font-bold text-[#1b3a6b] mb-2 tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-bold text-azulmarino mb-2 tracking-tight">
             Validación de Cursos y Certificados
           </h1>
           <p className="text-sm text-slate-600 max-w-xl mx-auto">
@@ -447,9 +447,9 @@ export default function Validacion() {
                 setTabActiva('manual')
                 setErrorBusqueda('')
               }}
-              className={`min-h-[48px] flex items-center justify-center gap-2 py-3 px-4 text-sm font-semibold transition-colors focus-visible:ring-2 focus-visible:ring-[#1b3a6b] ${
+              className={`min-h-12 flex items-center justify-center gap-2 py-3 px-4 text-sm font-semibold transition-colors focus-visible:ring-2 focus-visible:ring-azulmarino ${
                 tabActiva === 'manual'
-                  ? 'bg-[#1b3a6b] text-dorado'
+                  ? 'bg-azulmarino text-dorado'
                   : 'bg-slate-50 text-slate-700 hover:bg-slate-100'
               }`}
             >
@@ -467,9 +467,9 @@ export default function Validacion() {
                 setTabActiva('qr')
                 setErrorBusqueda('')
               }}
-              className={`min-h-[48px] flex items-center justify-center gap-2 py-3 px-4 text-sm font-semibold transition-colors focus-visible:ring-2 focus-visible:ring-[#1b3a6b] ${
+              className={`min-h-12 flex items-center justify-center gap-2 py-3 px-4 text-sm font-semibold transition-colors focus-visible:ring-2 focus-visible:ring-azulmarino ${
                 tabActiva === 'qr'
-                  ? 'bg-[#1b3a6b] text-dorado'
+                  ? 'bg-azulmarino text-dorado'
                   : 'bg-slate-50 text-slate-700 hover:bg-slate-100'
               }`}
             >
@@ -498,9 +498,9 @@ export default function Validacion() {
                         setDatosRespuesta(null)
                         setErrorBusqueda('')
                       }}
-                      className={`min-h-[44px] flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg text-xs sm:text-sm font-semibold border transition focus-visible:ring-2 focus-visible:ring-[#1b3a6b] ${
+                      className={`min-h-11 flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg text-xs sm:text-sm font-semibold border transition focus-visible:ring-2 focus-visible:ring-azulmarino ${
                         metodoBusqueda === 'folio'
-                          ? 'border-[#1b3a6b] bg-blue-50/70 text-[#1b3a6b]'
+                          ? 'border-azulmarino bg-blue-50/70 text-azulmarino'
                           : 'border-slate-200 text-slate-700 hover:bg-slate-50'
                       }`}
                     >
@@ -515,9 +515,9 @@ export default function Validacion() {
                         setDatosRespuesta(null)
                         setErrorBusqueda('')
                       }}
-                      className={`min-h-[44px] flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg text-xs sm:text-sm font-semibold border transition focus-visible:ring-2 focus-visible:ring-[#1b3a6b] ${
+                      className={`min-h-11 flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg text-xs sm:text-sm font-semibold border transition focus-visible:ring-2 focus-visible:ring-azulmarino ${
                         metodoBusqueda === 'curp'
-                          ? 'border-[#1b3a6b] bg-blue-50/70 text-[#1b3a6b]'
+                          ? 'border-azulmarino bg-blue-50/70 text-azulmarino'
                           : 'border-slate-200 text-slate-700 hover:bg-slate-50'
                       }`}
                     >
@@ -554,14 +554,14 @@ export default function Validacion() {
                         ? 'Ej. CER-01'
                         : 'Ej. ABCD960101HDFXYZ01'
                     }
-                    className="w-full border border-slate-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#1b3a6b] font-mono"
+                    className="w-full border border-slate-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-azulmarino font-mono"
                   />
                 </div>
 
                 <button
                   type="submit"
                   disabled={cargando}
-                  className="w-full min-h-[44px] bg-dorado text-[#0f1f3d] font-bold text-sm py-3 px-6 rounded-lg hover:brightness-95 transition flex items-center justify-center gap-2 disabled:opacity-50 shadow-sm focus-visible:ring-2 focus-visible:ring-[#1b3a6b]"
+                  className="w-full min-h-11 bg-dorado text-[#0f1f3d] font-bold text-sm py-3 px-6 rounded-lg hover:brightness-95 transition flex items-center justify-center gap-2 disabled:opacity-50 shadow-sm focus-visible:ring-2 focus-visible:ring-azulmarino"
                 >
                   <Search className="w-4 h-4" aria-hidden="true" />
                   <span>
@@ -610,7 +610,7 @@ export default function Validacion() {
 
               {/* Selector de archivo universal */}
               <div className="w-full max-w-sm border-t border-slate-200 pt-4 flex flex-col items-center gap-3">
-                <label className="min-h-[44px] w-full flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs sm:text-sm font-bold py-2.5 px-4 rounded-xl cursor-pointer transition focus-within:ring-2 focus-within:ring-[#1b3a6b]">
+                <label className="min-h-11 w-full flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs sm:text-sm font-bold py-2.5 px-4 rounded-xl cursor-pointer transition focus-within:ring-2 focus-within:ring-azulmarino">
                   <Upload
                     className="w-4 h-4 text-slate-600"
                     aria-hidden="true"
