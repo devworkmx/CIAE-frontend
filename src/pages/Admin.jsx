@@ -11,12 +11,14 @@ import {
   CheckCircle2,
   XCircle,
   RefreshCw,
+  GraduationCap,
 } from 'lucide-react'
 
 export default function Admin() {
   const navigate = useNavigate()
-  const [seccion, setSeccion] = useState('certificados') // 'certificados' | 'alumnos' | 'cursos'
+  const [seccion, setSeccion] = useState('certificados')
 
+  const [usuarioActual, setUsuarioActual] = useState(null)
   const [cursos, setCursos] = useState([])
   const [alumnos, setAlumnos] = useState([])
   const [certificados, setCertificados] = useState([])
@@ -36,19 +38,17 @@ export default function Admin() {
   }, [])
 
   const cargarDatos = useCallback(async () => {
-    // Ya no hay token que leer en localStorage: RutaProtegida (App.jsx) ya
-    // confirmó con el backend que hay sesión antes de mostrar esta página.
-    // Aun así, seguimos revisando 401 aquí abajo por si la sesión expira
-    // mientras el usuario ya está viendo el panel.
     setCargando(true)
     try {
-      const [resCursos, resAlumnos, resCerts] = await Promise.all([
+      const [resMe, resCursos, resAlumnos, resCerts] = await Promise.all([
+        fetch(`${API_URL}/api/auth/me`, { credentials: 'include' }),
         fetch(`${API_URL}/api/cursos`, { credentials: 'include' }),
         fetch(`${API_URL}/api/alumnos`, { credentials: 'include' }),
         fetch(`${API_URL}/api/certificados`, { credentials: 'include' }),
       ])
 
       if (
+        resMe.status === 401 ||
         resCursos.status === 401 ||
         resAlumnos.status === 401 ||
         resCerts.status === 401
@@ -57,16 +57,18 @@ export default function Admin() {
         return
       }
 
-      if (!resCursos.ok || !resAlumnos.ok || !resCerts.ok) {
+      if (!resMe.ok || !resCursos.ok || !resAlumnos.ok || !resCerts.ok) {
         throw new Error('Error al sincronizar con el catálogo institucional.')
       }
 
-      const [dataCursos, dataAlumnos, dataCerts] = await Promise.all([
+      const [dataMe, dataCursos, dataAlumnos, dataCerts] = await Promise.all([
+        resMe.json(),
         resCursos.json(),
         resAlumnos.json(),
         resCerts.json(),
       ])
 
+      setUsuarioActual(dataMe)
       setCursos(dataCursos)
       setAlumnos(dataAlumnos)
       setCertificados(dataCerts)
@@ -85,33 +87,65 @@ export default function Admin() {
   }, [cargarDatos])
 
   return (
-    <main className="min-h-screen bg-slate-50 py-8 sm:py-12">
+    <main className="min-h-screen bg-slate-50 py-8 sm:py-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Encabezado del Panel */}
-        <header className="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200/80 pb-5">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-[#1b3a6b] tracking-tight">
-              Panel de Control Institucional
-            </h1>
-            <p className="text-xs sm:text-sm text-slate-600 mt-1">
-              Gestión de emisión académica, vigencias y control de folios
-              oficiales.
-            </p>
-          </div>
+        {/* Banner de Bienvenida Limpio (Sin redundancia de nombre de institución) */}
+        <header className="mb-8 bg-white border border-slate-200/80 rounded-3xl p-6 sm:p-8 shadow-xs">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+            <div className="space-y-1">
+              {/* Título de Bienvenida */}
+              {cargando && !usuarioActual ? (
+                <div className="h-9 w-64 bg-slate-200 rounded-xl animate-pulse" />
+              ) : (
+                <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+                  Hola, {usuarioActual?.nombre_completo}
+                </h1>
+              )}
 
-          {/* <button
-            type="button"
-            onClick={cargarDatos}
-            disabled={cargando}
-            aria-label="Actualizar datos del panel"
-            className="min-h-[44px] self-start sm:self-auto inline-flex items-center gap-2 px-3.5 py-2 text-xs font-bold text-[#1b3a6b] bg-white border border-slate-300 rounded-lg shadow-2xs hover:bg-slate-50 transition-colors disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1b3a6b]"
-          >
-            <RefreshCw
-              className={`w-3.5 h-3.5 ${cargando ? 'animate-spin' : ''}`}
-              aria-hidden="true"
-            />
-            <span>Sincronizar</span>
-          </button> */}
+              {/* Subtítulo limpio y funcional */}
+              {cargando && !usuarioActual ? (
+                <div className="h-4 w-72 bg-slate-100 rounded-md animate-pulse mt-1" />
+              ) : (
+                <p className="text-xs sm:text-sm text-slate-500">
+                  Supervisión de folios, catálogo curricular y padrón de
+                  acreditaciones.
+                </p>
+              )}
+            </div>
+
+            {/* Métricas rápidas */}
+            <div className="grid grid-cols-3 gap-3 sm:gap-4 border-t lg:border-t-0 lg:border-l border-slate-100 pt-4 lg:pt-0 lg:pl-6">
+              <div className="bg-slate-50 border border-slate-100 p-3 sm:p-4 rounded-2xl text-center min-w-[85px]">
+                <Award className="w-4 h-4 mx-auto text-[#1b3a6b] mb-1.5" />
+                <span className="text-lg sm:text-xl font-black text-slate-900 block leading-none">
+                  {cargando ? '...' : certificados.length}
+                </span>
+                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mt-1 block">
+                  Certificados
+                </span>
+              </div>
+
+              <div className="bg-slate-50 border border-slate-100 p-3 sm:p-4 rounded-2xl text-center min-w-[85px]">
+                <Users className="w-4 h-4 mx-auto text-[#1b3a6b] mb-1.5" />
+                <span className="text-lg sm:text-xl font-black text-slate-900 block leading-none">
+                  {cargando ? '...' : alumnos.length}
+                </span>
+                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mt-1 block">
+                  Alumnos
+                </span>
+              </div>
+
+              <div className="bg-slate-50 border border-slate-100 p-3 sm:p-4 rounded-2xl text-center min-w-[85px]">
+                <GraduationCap className="w-4 h-4 mx-auto text-[#1b3a6b] mb-1.5" />
+                <span className="text-lg sm:text-xl font-black text-slate-900 block leading-none">
+                  {cargando ? '...' : cursos.length}
+                </span>
+                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mt-1 block">
+                  Cursos
+                </span>
+              </div>
+            </div>
+          </div>
         </header>
 
         {/* Notificación flotante accesible */}
@@ -119,7 +153,7 @@ export default function Admin() {
           <aside
             role="status"
             aria-live="polite"
-            className={`mb-6 p-4 rounded-xl border flex items-center gap-3 text-sm font-semibold transition-all ${
+            className={`mb-6 p-4 rounded-2xl border flex items-center gap-3 text-sm font-semibold transition-all ${
               alerta.tipo === 'exito'
                 ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
                 : 'bg-red-50 border-red-200 text-red-800'
@@ -140,66 +174,64 @@ export default function Admin() {
           </aside>
         )}
 
-        {/* ================================================================
-            NAVEGACIÓN POR PESTAÑAS (100% RESPONSIVA - NO DESBORDA EN MÓVIL)
-        ================================================================ */}
+        {/* Navegación por pestañas */}
         <nav
           aria-label="Secciones del panel"
-          className="grid grid-cols-3 sm:flex sm:items-center gap-1.5 sm:gap-3 mb-6 bg-slate-200/60 sm:bg-transparent p-1 sm:p-0 rounded-xl"
+          className="grid grid-cols-3 sm:flex sm:items-center gap-2 mb-6 bg-slate-200/60 sm:bg-transparent p-1.5 sm:p-0 rounded-2xl"
         >
           <button
             type="button"
             onClick={() => setSeccion('certificados')}
             aria-pressed={seccion === 'certificados'}
-            className={`min-h-[44px] flex items-center justify-center gap-1.5 sm:gap-2 px-2 sm:px-4 py-2.5 rounded-lg font-bold text-xs sm:text-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1b3a6b] ${
+            className={`min-h-[46px] flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1b3a6b] ${
               seccion === 'certificados'
-                ? 'bg-[#1b3a6b] text-white shadow-xs'
+                ? 'bg-[#1b3a6b] text-white shadow-sm'
                 : 'bg-transparent sm:bg-white text-slate-700 hover:text-slate-950 sm:border sm:border-slate-200'
             }`}
           >
             <Award className="w-4 h-4 shrink-0" aria-hidden="true" />
-            <span className="truncate">Certificados</span>
+            <span className="truncate">
+              Certificados ({certificados.length})
+            </span>
           </button>
 
           <button
             type="button"
             onClick={() => setSeccion('alumnos')}
             aria-pressed={seccion === 'alumnos'}
-            className={`min-h-[44px] flex items-center justify-center gap-1.5 sm:gap-2 px-2 sm:px-4 py-2.5 rounded-lg font-bold text-xs sm:text-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1b3a6b] ${
+            className={`min-h-[46px] flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1b3a6b] ${
               seccion === 'alumnos'
-                ? 'bg-[#1b3a6b] text-white shadow-xs'
+                ? 'bg-[#1b3a6b] text-white shadow-sm'
                 : 'bg-transparent sm:bg-white text-slate-700 hover:text-slate-950 sm:border sm:border-slate-200'
             }`}
           >
             <Users className="w-4 h-4 shrink-0" aria-hidden="true" />
-            <span className="truncate">Alumnos</span>
+            <span className="truncate">Alumnos ({alumnos.length})</span>
           </button>
 
           <button
             type="button"
             onClick={() => setSeccion('cursos')}
             aria-pressed={seccion === 'cursos'}
-            className={`min-h-[44px] flex items-center justify-center gap-1.5 sm:gap-2 px-2 sm:px-4 py-2.5 rounded-lg font-bold text-xs sm:text-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1b3a6b] ${
+            className={`min-h-[46px] flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1b3a6b] ${
               seccion === 'cursos'
-                ? 'bg-[#1b3a6b] text-white shadow-xs'
+                ? 'bg-[#1b3a6b] text-white shadow-sm'
                 : 'bg-transparent sm:bg-white text-slate-700 hover:text-slate-950 sm:border sm:border-slate-200'
             }`}
           >
             <BookOpen className="w-4 h-4 shrink-0" aria-hidden="true" />
-            <span className="truncate">Cursos</span>
+            <span className="truncate">Cursos ({cursos.length})</span>
           </button>
         </nav>
 
-        {/* ================================================================
-            CONTENIDO DINÁMICO SEGÚN PESTAÑA SELECCIONADA
-        ================================================================ */}
+        {/* Contenido dinámico */}
         {cargando && certificados.length === 0 && alumnos.length === 0 ? (
-          <div className="bg-white p-12 text-center rounded-2xl border border-slate-200 text-slate-500 text-sm font-medium">
+          <div className="bg-white p-16 text-center rounded-3xl border border-slate-200 text-slate-500 text-sm font-semibold">
             <RefreshCw
-              className="w-6 h-6 mx-auto mb-2 animate-spin text-[#1b3a6b]"
+              className="w-7 h-7 mx-auto mb-3 animate-spin text-[#1b3a6b]"
               aria-hidden="true"
             />
-            <span>Cargando padrón institucional...</span>
+            <span>Sincronizando información institucional...</span>
           </div>
         ) : (
           <div>

@@ -9,182 +9,12 @@ import {
   IdCard,
   CheckCircle2,
   XCircle,
-  Award,
-  Calendar,
-  Clock,
-  User,
-  UserCheck,
-  ShieldCheck,
   ShieldAlert,
-  ExternalLink,
   Upload,
+  User,
 } from 'lucide-react'
 import { API_URL } from '../services/api'
-
-function formatearFecha(fechaStr) {
-  if (!fechaStr) return ''
-  const partes = String(fechaStr).split('-')
-  if (partes.length !== 3) return fechaStr
-  const [anio, mes, dia] = partes
-  return `${dia}/${mes}/${anio}`
-}
-
-function TarjetaCertificadoOficial({ cert, alumnoActivo = true, fechaHoy }) {
-  const tieneVig = Boolean(cert.tiene_vigencia)
-  const fechaExp = cert.fecha_vigencia
-  const esExpirado = tieneVig && fechaExp && fechaExp < fechaHoy
-  const alumnoDadoDeBaja =
-    cert.alumno_activo === false || alumnoActivo === false
-  const esValido = cert.valido !== false && !esExpirado && !alumnoDadoDeBaja
-  const folioMostrar = cert.folio_manual || cert.folio || 'N/A'
-
-  return (
-    <article className="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden transition hover:shadow-2xl">
-      <div
-        className={`p-6 text-white text-center transition-colors ${
-          esValido ? 'bg-azulmarino' : 'bg-red-800'
-        }`}
-      >
-        {esValido ? (
-          <>
-            <CheckCircle2
-              className="w-14 h-14 mx-auto mb-2 text-dorado"
-              aria-hidden="true"
-            />
-            <h3 className="text-xl font-bold tracking-tight">
-              Certificado Oficial Auténtico
-            </h3>
-            <p className="text-xs uppercase tracking-widest text-crema/90 mt-1 font-mono">
-              Folio: {folioMostrar}
-            </p>
-          </>
-        ) : (
-          <>
-            <XCircle
-              className="w-14 h-14 mx-auto mb-2 text-red-200"
-              aria-hidden="true"
-            />
-            <h3 className="text-xl font-bold tracking-tight">
-              {alumnoDadoDeBaja
-                ? 'Documento Inhabilitado (Baja Institucional)'
-                : esExpirado
-                  ? 'Certificado Vencido o Expirado'
-                  : 'Certificado Revocado o No Válido'}
-            </h3>
-            <p className="text-xs uppercase tracking-widest text-red-200 mt-1 font-mono">
-              Folio: {folioMostrar}
-            </p>
-          </>
-        )}
-      </div>
-
-      <div className="p-6 space-y-4">
-        <div className="border-b border-slate-100 pb-3">
-          <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
-            Acreditado a
-          </span>
-          <div className="flex items-center gap-2 text-base font-bold text-slate-900">
-            <User className="w-4 h-4 text-dorado shrink-0" aria-hidden="true" />
-            <span>{cert.alumno_nombre}</span>
-          </div>
-        </div>
-
-        <div className="border-b border-slate-100 pb-3">
-          <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
-            Programa Académico
-          </span>
-          <div className="flex items-center gap-2 text-base font-bold text-azulmarino">
-            <Award
-              className="w-4 h-4 text-dorado shrink-0"
-              aria-hidden="true"
-            />
-            <span>{cert.curso_nombre}</span>
-          </div>
-        </div>
-
-        <div className="border-b border-slate-100 pb-3">
-          <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
-            Instructor / Evaluador
-          </span>
-          <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
-            <UserCheck
-              className="w-4 h-4 text-slate-400 shrink-0"
-              aria-hidden="true"
-            />
-            <span>{cert.instructor}</span>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4 border-b border-slate-100 pb-3">
-          <div>
-            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
-              Duración Curricular
-            </span>
-            <div className="flex items-center gap-1.5 text-sm text-slate-700 font-medium">
-              <Clock
-                className="w-4 h-4 text-slate-400 shrink-0"
-                aria-hidden="true"
-              />
-              <span>{cert.duracion_horas} horas</span>
-            </div>
-          </div>
-          <div>
-            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
-              Fecha de Emisión
-            </span>
-            <div className="flex items-center gap-1.5 text-sm text-slate-700 font-medium">
-              <Calendar
-                className="w-4 h-4 text-slate-400 shrink-0"
-                aria-hidden="true"
-              />
-              <span>{formatearFecha(cert.fecha_emision)}</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="pt-1">
-          {tieneVig ? (
-            esValido ? (
-              <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 p-3 rounded-xl flex items-center justify-center gap-2 text-sm font-semibold">
-                <ShieldCheck
-                  className="w-4 h-4 text-emerald-600 shrink-0"
-                  aria-hidden="true"
-                />
-                <span>Vigente hasta el {formatearFecha(fechaExp)}</span>
-              </div>
-            ) : (
-              <div className="bg-red-50 border border-red-200 text-red-700 p-3 rounded-xl flex items-center justify-center gap-2 text-sm font-semibold">
-                <ShieldAlert
-                  className="w-4 h-4 text-red-600 shrink-0"
-                  aria-hidden="true"
-                />
-                <span>Expiró el {formatearFecha(fechaExp)}</span>
-              </div>
-            )
-          ) : (
-            <div className="bg-slate-50 border border-slate-200 text-slate-700 p-3 rounded-xl text-center text-sm font-medium">
-              Vigencia: <strong>Permanente / Sin caducidad</strong>
-            </div>
-          )}
-        </div>
-
-        {cert.token_publico && (
-          <div className="pt-2 text-center">
-            <a
-              href={`/validar/${cert.token_publico}`}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-700 hover:text-blue-900 hover:underline transition py-1"
-            >
-              <ExternalLink className="w-3.5 h-3.5" aria-hidden="true" />
-              <span>Abrir vista directa con Código QR</span>
-            </a>
-          </div>
-        )}
-      </div>
-    </article>
-  )
-}
+import TarjetaCertificado from '../components/TarjetaCertificado'
 
 export default function Validacion() {
   const navigate = useNavigate()
@@ -327,7 +157,7 @@ export default function Validacion() {
     return () => detenerCamara()
   }, [tabActiva, procesarResultadoQR])
 
-  // Lector de archivos subidos por el usuario compatible con cualquier navegador
+  // Lector de archivos subidos por el usuario
   function handleSubirImagenQR(e) {
     const archivo = e.target.files?.[0]
     if (!archivo) return
@@ -608,7 +438,6 @@ export default function Validacion() {
                 </div>
               )}
 
-              {/* Selector de archivo universal */}
               <div className="w-full max-w-sm border-t border-slate-200 pt-4 flex flex-col items-center gap-3">
                 <label className="min-h-11 w-full flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs sm:text-sm font-bold py-2.5 px-4 rounded-xl cursor-pointer transition focus-within:ring-2 focus-within:ring-azulmarino">
                   <Upload
@@ -715,18 +544,19 @@ export default function Validacion() {
 
                 <div className="space-y-6">
                   {certificadosList.map((cert, index) => (
-                    <TarjetaCertificadoOficial
+                    <TarjetaCertificado
                       key={cert.id || cert.token_publico || index}
                       cert={cert}
                       alumnoActivo={alumnoInfo?.activo !== false}
                       fechaHoy={fechaHoy}
+                      mostrarEnlaceDirecto={true}
                     />
                   ))}
                 </div>
               </>
             ) : (
               certificadosList[0] && (
-                <TarjetaCertificadoOficial
+                <TarjetaCertificado
                   cert={certificadosList[0]}
                   alumnoActivo={
                     alumnoInfo
@@ -734,6 +564,7 @@ export default function Validacion() {
                       : certificadosList[0].alumno_activo !== false
                   }
                   fechaHoy={fechaHoy}
+                  mostrarEnlaceDirecto={true}
                 />
               )
             )}
