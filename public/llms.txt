@@ -1,0 +1,8 @@
+# CIAE - Centro de Innovación y Aprendizaje Estratégico
+
+> Plataforma institucional para la emisión, acreditación y validación pública de certificados académicos y constancias oficiales.
+
+## Enlaces Principales
+- [/validacion-cursos](/validacion-cursos): Consulta y verificación pública de folios y certificados mediante código QR o token único.
+- [/nosotros](/nosotros): Información institucional y marco de validez académica.
+- [/privacidad](/privacidad): Aviso de privacidad y tratamiento de datos personales.
