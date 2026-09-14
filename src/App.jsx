@@ -6,12 +6,13 @@ import {
   Link,
   useNavigate,
 } from 'react-router-dom'
+import ScrollToTop from './components/ScrollToTop' // <--- 1. Importa tu componente ScrollToTop (ajusta la ruta si está en otra carpeta)
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
 import { cerrarSesion } from './services/api'
 
 import Home from './pages/Home'
-import Contact from './pages/Contact'
+import Contacto from './pages/Contacto'
 import Nosotros from './pages/Nosotros'
 import Validacion from './pages/Validacion'
 import Login from './pages/Login'
@@ -81,7 +82,7 @@ function LayoutAdmin() {
             <button
               type="button"
               onClick={handleLogout}
-              className="min-h-[44px] inline-flex items-center gap-2 bg-red-500/20 hover:bg-red-500/30 text-red-300 hover:text-red-100 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
+              className="min-h-11 inline-flex items-center gap-2 bg-red-500/20 hover:bg-red-500/30 text-red-300 hover:text-red-100 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
             >
               <LogOut className="w-4 h-4" aria-hidden="true" />
               <span>Cerrar sesión</span>
@@ -101,11 +102,14 @@ function LayoutAdmin() {
 export default function App() {
   return (
     <BrowserRouter>
+      {/* 2. Colócalo aquí como primer hijo del BrowserRouter */}
+      <ScrollToTop />
+
       <Routes>
         {/* Rutas Públicas bajo LayoutPublico (Tienen Navbar y Footer) */}
         <Route element={<LayoutPublico />}>
           <Route path="/" element={<Home />} />
-          <Route path="/contact" element={<Contact />} />
+          <Route path="/contacto" element={<Contacto />} />
           <Route path="/nosotros" element={<Nosotros />} />
           <Route path="/validacion-cursos" element={<Validacion />} />
           <Route path="/validar/:token" element={<ValidarToken />} />
@@ -119,13 +123,11 @@ export default function App() {
             }
           />
 
-          {/* Ruta comodín: cualquier URL que no coincida con las de arriba
-              cae aquí. Sin esto, React Router no renderiza nada para una
-              URL desconocida y la página se queda en blanco. */}
+          {/* Ruta comodín */}
           <Route path="*" element={<NotFound />} />
         </Route>
 
-        {/* Ruta Privada bajo LayoutAdmin (Aislada, con cabecera ejecutiva) */}
+        {/* Ruta Privada bajo LayoutAdmin */}
         <Route
           element={
             <RutaProtegida>

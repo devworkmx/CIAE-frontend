@@ -49,7 +49,7 @@ function ValidarToken() {
   if (cargando) {
     return (
       <div className="min-h-screen bg-slate-100 flex items-center justify-center">
-        <p className="text-[#1b3a6b] font-semibold text-lg animate-pulse">
+        <p className="text-azulmarino font-semibold text-lg animate-pulse">
           Consultando registro institucional...
         </p>
       </div>
@@ -73,7 +73,7 @@ function ValidarToken() {
         <div
           className={`p-6 text-white text-center ${
             esValidoYVigente
-              ? 'bg-[#1b3a6b]'
+              ? 'bg-azulmarino'
               : esAlumnoInactivo
                 ? 'bg-red-900'
                 : 'bg-red-800'
@@ -149,7 +149,7 @@ function ValidarToken() {
                 <span className="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1">
                   Programa Académico
                 </span>
-                <div className="flex items-center gap-2 text-base font-bold text-[#1b3a6b]">
+                <div className="flex items-center gap-2 text-base font-bold text-azulmarino">
                   <Award className="w-4 h-4 text-dorado" />
                   {datos.curso_nombre}
                 </div>
@@ -220,7 +220,7 @@ function ValidarToken() {
               </p>
               <Link
                 to="/validacion-cursos"
-                className="inline-block bg-[#1b3a6b] text-white px-5 py-2 rounded text-sm font-semibold hover:bg-opacity-90"
+                className="inline-block bg-azulmarino text-white px-5 py-2 rounded text-sm font-semibold hover:bg-opacity-90"
               >
                 Búsqueda Manual
               </Link>
