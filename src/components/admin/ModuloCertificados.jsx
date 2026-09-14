@@ -294,14 +294,16 @@ export default function ModuloCertificados({
 
   async function descargarQr(certId, alumnoNombre) {
     try {
-      const currentOrigin = encodeURIComponent(window.location.origin)
-      const res = await fetch(
-        `${API_URL}/api/certificados/${certId}/qr?base_url=${currentOrigin}`,
-        {
-          headers: getJsonHeaders(),
-          credentials: 'include',
-        }
-      )
+      // NOTA: ya no se manda "base_url" como parámetro. El backend decide
+      // la URL de validación embebida en el QR por sí mismo (usando el
+      // encabezado Origin/Referer validado contra su whitelist de CORS, o
+      // su FRONTEND_VALIDATION_URL fijo como respaldo), precisamente para
+      // que este endpoint no pueda usarse para incrustar un dominio
+      // arbitrario en un QR "oficial". Ver certificados.py:_obtener_url_qr.
+      const res = await fetch(`${API_URL}/api/certificados/${certId}/qr`, {
+        headers: getJsonHeaders(),
+        credentials: 'include',
+      })
       if (!res.ok) throw new Error()
       const blob = await res.blob()
       const url = window.URL.createObjectURL(blob)

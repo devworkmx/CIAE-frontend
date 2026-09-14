@@ -17,6 +17,7 @@ import Validacion from './pages/Validacion'
 import Login from './pages/Login'
 import ValidarToken from './pages/ValidarToken'
 import Admin from './pages/Admin'
+import NotFound from './pages/NotFound'
 import RutaProtegida from './components/RutaProtegida'
 import RutaPublica from './components/RutaPublica'
 
@@ -117,6 +118,11 @@ export default function App() {
               </RutaPublica>
             }
           />
+
+          {/* Ruta comodín: cualquier URL que no coincida con las de arriba
+              cae aquí. Sin esto, React Router no renderiza nada para una
+              URL desconocida y la página se queda en blanco. */}
+          <Route path="*" element={<NotFound />} />
         </Route>
 
         {/* Ruta Privada bajo LayoutAdmin (Aislada, con cabecera ejecutiva) */}
