@@ -247,7 +247,17 @@ export default function ModuloCertificados({
         onRecargar()
       } else {
         const err = await res.json()
-        onAlerta(err.detail || 'Error al procesar el certificado', 'error')
+
+        let mensajeError = 'Error al procesar el certificado'
+        if (Array.isArray(err.detail)) {
+          mensajeError = err.detail
+            .map((e) => `${e.loc[e.loc.length - 1]}: ${e.msg}`)
+            .join(', ')
+        } else if (typeof err.detail === 'string') {
+          mensajeError = err.detail
+        }
+
+        onAlerta(mensajeError, 'error')
       }
     } catch {
       onAlerta('Error de conexión con el servidor', 'error')
@@ -378,6 +388,8 @@ export default function ModuloCertificados({
               id="folio_manual"
               type="text"
               required
+              minLength={3}
+              maxLength={50}
               placeholder="Ej. CERT-2024-001"
               value={form.folio_manual}
               onChange={(e) =>
@@ -462,6 +474,10 @@ export default function ModuloCertificados({
               id="instructor"
               type="text"
               required
+              minLength={3}
+              maxLength={80}
+              pattern="[A-Za-zÀ-ÿ\s\.]+"
+              title="Solo se permiten letras, puntos y espacios"
               placeholder="Ej. Mtro. Roberto Mendoza"
               value={form.instructor}
               onChange={(e) => setForm({ ...form, instructor: e.target.value })}
@@ -661,7 +677,6 @@ export default function ModuloCertificados({
                         {cert.fecha_emision}
                       </p>
 
-                      {/* Enlace con texto distintivo para evitar "Identical links have the same purpose" */}
                       <a
                         href={`${originWeb}/validar/${cert.token_publico}`}
                         target="_blank"

@@ -70,7 +70,17 @@ export default function ModuloCursos({
         onRecargar()
       } else {
         const err = await res.json()
-        onAlerta(err.detail || 'Error al procesar el curso', 'error')
+
+        let mensajeError = 'Error al procesar el curso'
+        if (Array.isArray(err.detail)) {
+          mensajeError = err.detail
+            .map((e) => `${e.loc[e.loc.length - 1]}: ${e.msg}`)
+            .join(', ')
+        } else if (typeof err.detail === 'string') {
+          mensajeError = err.detail
+        }
+
+        onAlerta(mensajeError, 'error')
       }
     } catch {
       onAlerta('Error de conexión con el servidor', 'error')
@@ -163,7 +173,9 @@ export default function ModuloCursos({
               id="curso_nombre"
               type="text"
               required
-              placeholder="Ej. Formación de Instructores"
+              minLength={3}
+              maxLength={100}
+              placeholder="Ej. Formación de Instructores (Mín. 3 caracteres)"
               value={form.nombre}
               onChange={(e) => setForm({ ...form, nombre: e.target.value })}
               className="w-full border rounded-lg p-2.5 text-sm outline-none focus:border-[#1b3a6b]"
@@ -180,6 +192,8 @@ export default function ModuloCursos({
             <input
               id="curso_clave"
               type="text"
+              minLength={2}
+              maxLength={30}
               placeholder="Ej. CURS-2024-EDU"
               value={form.clave_curso}
               onChange={(e) =>
@@ -201,6 +215,7 @@ export default function ModuloCursos({
               type="number"
               required
               min="1"
+              max="1000"
               value={form.duracion_horas}
               onChange={(e) =>
                 setForm({ ...form, duracion_horas: e.target.value })
@@ -239,6 +254,7 @@ export default function ModuloCursos({
                 id="curso_meses"
                 type="number"
                 min="1"
+                max="120"
                 value={form.meses_vigencia}
                 onChange={(e) =>
                   setForm({ ...form, meses_vigencia: e.target.value })

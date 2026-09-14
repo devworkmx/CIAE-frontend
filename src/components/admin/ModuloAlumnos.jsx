@@ -15,8 +15,6 @@ import {
   Fingerprint,
 } from 'lucide-react'
 
-// Formato oficial de CURP: 4 letras + 6 dígitos (fecha) + H/M + 5 letras
-// (estado + consonantes internas) + 2 alfanuméricos + 1 dígito verificador.
 const CURP_REGEX =
   /^[A-Z][AEIOUX][A-Z]{2}\d{2}(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])[HM](AS|BC|BS|CC|CS|CH|CL|CM|DF|DG|GT|GR|HG|JC|MC|MN|MS|NT|NL|OC|PL|QO|QR|SP|SL|SR|TC|TS|TL|VZ|YN|ZS|NE)[B-DF-HJ-NP-TV-Z]{3}[A-Z\d]\d$/
 
@@ -69,11 +67,21 @@ export default function ModuloAlumnos({
     }
     setErrorCurp('')
 
+    // Validación estricta del teléfono: si se escribe algo, debe ser exactamente de 10 dígitos numéricos
+    const telLimpio = form.telefono?.trim() || ''
+    if (telLimpio !== '' && !/^\d{10}$/.test(telLimpio)) {
+      onAlerta(
+        'El número de teléfono debe tener exactamente 10 dígitos numéricos.',
+        'error'
+      )
+      return
+    }
+
     const body = {
       ...form,
-      curp: form.curp.trim().toUpperCase(),
+      curp: curpLimpia,
       email: form.email?.trim() === '' ? null : form.email?.trim(),
-      telefono: form.telefono?.trim() === '' ? null : form.telefono?.trim(),
+      telefono: telLimpio === '' ? null : telLimpio,
     }
 
     const endpoint = editandoId
@@ -99,7 +107,17 @@ export default function ModuloAlumnos({
         onRecargar()
       } else {
         const err = await res.json()
-        onAlerta(err.detail || 'Error al procesar el alumno', 'error')
+
+        let mensajeError = 'Error al procesar el alumno'
+        if (Array.isArray(err.detail)) {
+          mensajeError = err.detail
+            .map((e) => `${e.loc[e.loc.length - 1]}: ${e.msg}`)
+            .join(', ')
+        } else if (typeof err.detail === 'string') {
+          mensajeError = err.detail
+        }
+
+        onAlerta(mensajeError, 'error')
       }
     } catch {
       onAlerta('Error de conexión con el servidor', 'error')
@@ -159,10 +177,20 @@ export default function ModuloAlumnos({
         onRecargar()
       } else {
         const err = await res.json()
+
+        let mensajeError = 'Error al actualizar.'
+        if (Array.isArray(err.detail)) {
+          mensajeError = err.detail
+            .map((e) => `${e.loc[e.loc.length - 1]}: ${e.msg}`)
+            .join(', ')
+        } else if (typeof err.detail === 'string') {
+          mensajeError = err.detail
+        }
+
         setConfirmacionBaja((prev) => ({
           ...prev,
           cargando: false,
-          error: err.detail || 'Error al actualizar.',
+          error: mensajeError,
         }))
       }
     } catch {
@@ -242,6 +270,10 @@ export default function ModuloAlumnos({
               id="alumno_nombre"
               type="text"
               required
+              minLength={2}
+              maxLength={50}
+              pattern="[A-Za-zÀ-ÿ\s]+"
+              title="Solo se permiten letras y espacios"
               placeholder="Ej. Juan Carlos"
               value={form.nombre}
               onChange={(e) => setForm({ ...form, nombre: e.target.value })}
@@ -260,6 +292,10 @@ export default function ModuloAlumnos({
               id="alumno_apellidos"
               type="text"
               required
+              minLength={2}
+              maxLength={50}
+              pattern="[A-Za-zÀ-ÿ\s]+"
+              title="Solo se permiten letras y espacios"
               placeholder="Ej. Pérez González"
               value={form.apellidos}
               onChange={(e) => setForm({ ...form, apellidos: e.target.value })}
@@ -278,6 +314,7 @@ export default function ModuloAlumnos({
               id="alumno_curp"
               type="text"
               required
+              minLength={18}
               maxLength={18}
               placeholder="PEGC900101HDFRNR09"
               value={form.curp}
@@ -324,14 +361,19 @@ export default function ModuloAlumnos({
               htmlFor="alumno_tel"
               className="block text-xs font-semibold text-gray-700 mb-1"
             >
-              Teléfono
+              Teléfono (10 dígitos, opcional)
             </label>
             <input
               id="alumno_tel"
-              type="tel"
-              placeholder="+52 55 1234 5678"
+              type="text"
+              inputMode="numeric"
+              maxLength={10}
+              placeholder="5512345678"
               value={form.telefono}
-              onChange={(e) => setForm({ ...form, telefono: e.target.value })}
+              onChange={(e) => {
+                const soloNums = e.target.value.replace(/\D/g, '')
+                setForm({ ...form, telefono: soloNums })
+              }}
               className="w-full border rounded-lg p-2.5 text-sm outline-none focus:border-[#1b3a6b]"
             />
           </div>
