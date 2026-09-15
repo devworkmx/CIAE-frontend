@@ -52,3 +52,22 @@ export async function cerrarSesion() {
     // login; la cookie expirará sola según su tiempo de vida.
   }
 }
+
+export async function renovarCertificado(certificadoId) {
+  const res = await fetch(
+    `${API_URL}/api/certificados/${certificadoId}/renovar`,
+    {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    }
+  )
+
+  const data = await res.json()
+  if (!res.ok) {
+    throw new Error(data.detail || 'No fue posible renovar el certificado.')
+  }
+  return data
+}
