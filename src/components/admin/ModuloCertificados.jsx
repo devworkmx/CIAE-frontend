@@ -1,5 +1,5 @@
 import { useState, useMemo, useRef, useEffect } from 'react'
-import { API_URL, getJsonHeaders } from '../../services/api'
+import { API_URL, getJsonHeaders, renovarCertificado } from '../../services/api'
 import Paginacion from './Paginacion'
 import {
   Plus,
@@ -11,7 +11,19 @@ import {
   Calendar,
   Check,
   ChevronsUpDown,
+  RefreshCw,
+  X,
+  ShieldCheck,
+  CheckCircle2,
 } from 'lucide-react'
+
+function formatearFecha(fechaStr) {
+  if (!fechaStr) return 'N/A'
+  const partes = String(fechaStr).split('-')
+  if (partes.length !== 3) return fechaStr
+  const [anio, mes, dia] = partes
+  return `${dia}/${mes}/${anio}`
+}
 
 function calcularFechaExpiracion(fechaBaseStr, meses) {
   if (!fechaBaseStr) return ''
@@ -144,9 +156,9 @@ function SelectorItem({
 }
 
 export default function ModuloCertificados({
-  cursos,
-  alumnos,
-  certificados,
+  cursos = [],
+  alumnos = [],
+  certificados = [],
   onRecargar,
   onAlerta,
 }) {
@@ -159,6 +171,10 @@ export default function ModuloCertificados({
   const [paginaActual, setPaginaActual] = useState(1)
   const [certEditandoId, setCertEditandoId] = useState(null)
 
+  // Estado para la renovación interactiva
+  const [certParaRenovar, setCertParaRenovar] = useState(null)
+  const [procesandoRenovacion, setProcesandoRenovacion] = useState(false)
+
   const [form, setForm] = useState({
     folio_manual: '',
     curso_id: '',
@@ -169,6 +185,18 @@ export default function ModuloCertificados({
     fecha_vigencia: '',
     calificacion: '100',
   })
+
+  // Curso del certificado a renovar
+  const cursoDelCert = useMemo(() => {
+    if (!certParaRenovar) return null
+    return cursos.find((cur) => cur.id === certParaRenovar.curso_id) || null
+  }, [certParaRenovar, cursos])
+
+  // Estimación previa de nueva vigencia en el modal
+  const fechaEstimadaRenovacion = useMemo(() => {
+    if (!cursoDelCert?.meses_vigencia) return null
+    return calcularFechaExpiracion(fechaHoy, cursoDelCert.meses_vigencia)
+  }, [cursoDelCert, fechaHoy])
 
   function manejarCambioCurso(cursoIdStr) {
     const cId = parseInt(cursoIdStr)
@@ -264,6 +292,26 @@ export default function ModuloCertificados({
     }
   }
 
+  async function handleConfirmarRenovacion() {
+    if (!certParaRenovar) return
+    setProcesandoRenovacion(true)
+    try {
+      const resultado = await renovarCertificado(certParaRenovar.id)
+      onAlerta(
+        `Folio ${resultado.folio} renovado con éxito hasta el ${formatearFecha(
+          resultado.nueva_fecha_vigencia
+        )}. El código QR sigue vigente sin reimpresión.`,
+        'exito'
+      )
+      setCertParaRenovar(null)
+      if (onRecargar) await onRecargar()
+    } catch (err) {
+      onAlerta(err.message, 'error')
+    } finally {
+      setProcesandoRenovacion(false)
+    }
+  }
+
   function iniciarEdicion(cert) {
     setCertEditandoId(cert.id)
     setForm({
@@ -294,12 +342,6 @@ export default function ModuloCertificados({
 
   async function descargarQr(certId, alumnoNombre) {
     try {
-      // NOTA: ya no se manda "base_url" como parámetro. El backend decide
-      // la URL de validación embebida en el QR por sí mismo (usando el
-      // encabezado Origin/Referer validado contra su whitelist de CORS, o
-      // su FRONTEND_VALIDATION_URL fijo como respaldo), precisamente para
-      // que este endpoint no pueda usarse para incrustar un dominio
-      // arbitrario en un QR "oficial". Ver certificados.py:_obtener_url_qr.
       const res = await fetch(`${API_URL}/api/certificados/${certId}/qr`, {
         headers: getJsonHeaders(),
         credentials: 'include',
@@ -358,7 +400,7 @@ export default function ModuloCertificados({
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-      {/* Formulario */}
+      {/* Formulario Lateral */}
       <section
         aria-labelledby="form-cert-title"
         className="lg:col-span-4 bg-white p-6 rounded-xl border border-slate-200 shadow-sm"
@@ -571,7 +613,7 @@ export default function ModuloCertificados({
         </form>
       </section>
 
-      {/* Listado */}
+      {/* Listado Principal */}
       <section
         aria-labelledby="list-cert-title"
         className="lg:col-span-8 space-y-4"
@@ -579,6 +621,8 @@ export default function ModuloCertificados({
         <h2 id="list-cert-title" className="sr-only">
           Catálogo de Certificados Emitidos
         </h2>
+
+        {/* Barra de Filtro y Búsqueda */}
         <div className="flex flex-col sm:flex-row items-center gap-3">
           <div className="relative flex-1 w-full">
             <Search
@@ -628,6 +672,7 @@ export default function ModuloCertificados({
           </div>
         </div>
 
+        {/* Tarjeta de Lista */}
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
           <div className="px-5 py-3 border-b border-slate-100 flex items-center justify-between text-xs text-gray-500 font-semibold uppercase tracking-wider">
             <span>Documento & Titular</span>
@@ -645,6 +690,7 @@ export default function ModuloCertificados({
                   cert.tiene_vigencia &&
                   cert.fecha_vigencia &&
                   cert.fecha_vigencia < fechaHoy
+
                 return (
                   <div
                     key={cert.id}
@@ -660,7 +706,7 @@ export default function ModuloCertificados({
                             !cert.tiene_vigencia
                               ? 'bg-blue-100 text-blue-800'
                               : esExp
-                                ? 'bg-red-100 text-red-800'
+                                ? 'bg-amber-100 text-amber-800 border border-amber-300'
                                 : 'bg-emerald-100 text-emerald-800'
                           }`}
                         >
@@ -676,7 +722,13 @@ export default function ModuloCertificados({
                       </p>
                       <p className="text-xs text-gray-500 font-mono mt-0.5">
                         Folio: {cert.folio_manual} | Emisión:{' '}
-                        {cert.fecha_emision}
+                        {formatearFecha(cert.fecha_emision)}
+                        {cert.tiene_vigencia && (
+                          <span>
+                            {' '}
+                            | Vence: {formatearFecha(cert.fecha_vigencia)}
+                          </span>
+                        )}
                       </p>
 
                       <a
@@ -700,20 +752,34 @@ export default function ModuloCertificados({
                       </a>
                     </div>
 
-                    <div className="flex items-center gap-3 self-end sm:self-center">
+                    <div className="flex items-center gap-2.5 self-end sm:self-center">
+                      {/* Botón Inteligente de Renovación (Solo en certificados expirados) */}
+                      {esExp && (
+                        <button
+                          type="button"
+                          onClick={() => setCertParaRenovar(cert)}
+                          title="Renovar vigencia según los meses del curso"
+                          className="min-h-[40px] px-3 py-1.5 inline-flex items-center gap-1.5 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 rounded-lg text-xs font-bold transition focus-visible:ring-2 focus-visible:ring-amber-500"
+                        >
+                          <RefreshCw className="w-3.5 h-3.5 text-amber-700" />
+                          <span>Renovar</span>
+                        </button>
+                      )}
+
                       <button
                         type="button"
                         onClick={() => iniciarEdicion(cert)}
                         aria-label={`Editar certificado folio ${cert.folio_manual} de ${cert.alumno_nombre}`}
-                        className="min-h-[44px] min-w-[44px] flex items-center justify-center text-gray-600 hover:text-[#1b3a6b] rounded-lg hover:bg-slate-100 transition focus-visible:ring-2 focus-visible:ring-[#1b3a6b]"
+                        className="min-h-[40px] min-w-[40px] flex items-center justify-center text-gray-600 hover:text-[#1b3a6b] rounded-lg hover:bg-slate-100 transition focus-visible:ring-2 focus-visible:ring-[#1b3a6b]"
                       >
                         <Edit2 className="w-4 h-4" aria-hidden="true" />
                       </button>
+
                       <button
                         type="button"
                         onClick={() => descargarQr(cert.id, cert.alumno_nombre)}
                         aria-label={`Descargar código QR para certificado de ${cert.alumno_nombre}`}
-                        className="min-h-[44px] px-3.5 py-2 flex items-center gap-1.5 bg-slate-100 rounded-lg text-xs font-bold text-[#1b3a6b] hover:bg-slate-200 transition focus-visible:ring-2 focus-visible:ring-[#1b3a6b]"
+                        className="min-h-[40px] px-3.5 py-2 flex items-center gap-1.5 bg-slate-100 rounded-lg text-xs font-bold text-[#1b3a6b] hover:bg-slate-200 transition focus-visible:ring-2 focus-visible:ring-[#1b3a6b]"
                       >
                         <Download className="w-4 h-4" aria-hidden="true" /> QR
                       </button>
@@ -734,6 +800,116 @@ export default function ModuloCertificados({
           />
         </div>
       </section>
+
+      {/* Modal Accesible de Renovación */}
+      {certParaRenovar && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4"
+        >
+          <div className="bg-white max-w-md w-full rounded-3xl p-6 sm:p-7 shadow-2xl border border-slate-200 space-y-5 animate-in fade-in zoom-in-95 duration-150">
+            {/* Cabecera modal */}
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div className="flex items-center gap-2 text-slate-900">
+                <div className="w-8 h-8 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center">
+                  <RefreshCw className="w-4 h-4 text-amber-700" />
+                </div>
+                <h3 className="font-extrabold text-base">
+                  Renovar Acreditación
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setCertParaRenovar(null)}
+                className="p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Cuerpo modal con cálculos */}
+            <div className="space-y-3.5 text-xs sm:text-sm text-slate-600">
+              <p>
+                Estás a punto de reactivar la vigencia del certificado folio{' '}
+                <strong className="text-slate-900 font-mono">
+                  {certParaRenovar.folio_manual}
+                </strong>{' '}
+                de{' '}
+                <strong className="text-slate-900">
+                  {certParaRenovar.alumno_nombre}
+                </strong>
+                .
+              </p>
+
+              <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 space-y-2">
+                <div className="flex justify-between items-center text-xs">
+                  <span className="text-slate-500">Curso:</span>
+                  <span className="font-bold text-slate-800">
+                    {certParaRenovar.curso_nombre}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center text-xs">
+                  <span className="text-slate-500">
+                    Vigencia reglamentaria:
+                  </span>
+                  <span className="font-bold text-[#1b3a6b]">
+                    {cursoDelCert?.meses_vigencia || 12} meses
+                  </span>
+                </div>
+                <div className="border-t border-slate-200 pt-2 flex justify-between items-center text-xs">
+                  <span className="text-slate-700 font-semibold">
+                    Nueva expiración:
+                  </span>
+                  <span className="font-mono font-black text-emerald-700">
+                    {formatearFecha(fechaEstimadaRenovacion)}
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-2 bg-blue-50/80 border border-blue-200/70 p-3 rounded-xl text-blue-900 text-xs">
+                <ShieldCheck className="w-4 h-4 text-[#1b3a6b] shrink-0 mt-0.5" />
+                <span>
+                  <strong>Sin reimpresión:</strong> El código QR físico del
+                  diploma mantiene el mismo enlace y reflejará la renovación en
+                  tiempo real.
+                </span>
+              </div>
+            </div>
+
+            {/* Acciones */}
+            <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-slate-100">
+              <button
+                type="button"
+                disabled={procesandoRenovacion}
+                onClick={() => setCertParaRenovar(null)}
+                className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition-colors"
+              >
+                Cancelar
+              </button>
+
+              <button
+                type="button"
+                disabled={procesandoRenovacion}
+                onClick={handleConfirmarRenovacion}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-[#1b3a6b] hover:bg-[#142c52] text-white rounded-xl text-xs font-bold shadow-xs transition-colors disabled:opacity-50"
+              >
+                {procesandoRenovacion ? (
+                  <>
+                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                    <span>Aplicando...</span>
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle2 className="w-3.5 h-3.5 text-dorado" />
+                    <span>Confirmar Renovación</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
