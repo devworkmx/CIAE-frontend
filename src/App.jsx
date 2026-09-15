@@ -1,15 +1,8 @@
-import {
-  BrowserRouter,
-  Routes,
-  Route,
-  Outlet,
-  Link,
-  useNavigate,
-} from 'react-router-dom'
-import ScrollToTop from './components/ScrollToTop' // <--- 1. Importa tu componente ScrollToTop (ajusta la ruta si está en otra carpeta)
+import { BrowserRouter, Routes, Route, Outlet } from 'react-router-dom'
+import ScrollToTop from './components/ScrollToTop'
 import Navbar from './components/Navbar'
+import NavbarAdmin from './components/admin/NavbarAdmin'
 import Footer from './components/Footer'
-import { cerrarSesion } from './services/api'
 
 import Home from './pages/Home'
 import Contacto from './pages/Contacto'
@@ -21,8 +14,6 @@ import Admin from './pages/Admin'
 import NotFound from './pages/NotFound'
 import RutaProtegida from './components/RutaProtegida'
 import RutaPublica from './components/RutaPublica'
-
-import { Landmark, LogOut, ExternalLink } from 'lucide-react'
 
 // ===================== LAYOUT PÚBLICO =====================
 // Contiene la navegación completa institucional y el Footer
@@ -39,58 +30,11 @@ function LayoutPublico() {
 }
 
 // ===================== LAYOUT PRIVADO (ADMIN) =====================
-// Sin Footer ni menús comerciales; barra ejecutiva de trabajo
+// Utiliza la barra ejecutiva desacoplada para el panel institucional
 function LayoutAdmin() {
-  const navigate = useNavigate()
-
-  const handleLogout = async () => {
-    await cerrarSesion()
-    navigate('/login')
-  }
-
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
-      <header className="bg-[#0f1f3d] text-white border-b border-slate-800 shadow-sm sticky top-0 z-30">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Link
-              to="/admin"
-              className="flex items-center gap-2 text-white font-extrabold text-lg tracking-tight focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dorado rounded-md"
-            >
-              <Landmark
-                className="w-5 h-5 text-dorado shrink-0"
-                aria-hidden="true"
-              />
-              <span>CIAE</span>
-            </Link>
-            <span className="hidden sm:inline text-xs font-bold bg-white/10 text-dorado px-2.5 py-0.5 rounded-full uppercase tracking-wider">
-              Panel Administrativo
-            </span>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <Link
-              to="/"
-              target="_blank"
-              rel="noreferrer"
-              className="min-h-[44px] hidden sm:inline-flex items-center gap-1.5 text-xs text-slate-300 hover:text-white transition-colors"
-            >
-              <ExternalLink className="w-3.5 h-3.5" aria-hidden="true" />
-              <span>Ver sitio web</span>
-            </Link>
-
-            <button
-              type="button"
-              onClick={handleLogout}
-              className="min-h-11 inline-flex items-center gap-2 bg-red-500/20 hover:bg-red-500/30 text-red-300 hover:text-red-100 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
-            >
-              <LogOut className="w-4 h-4" aria-hidden="true" />
-              <span>Cerrar sesión</span>
-            </button>
-          </div>
-        </div>
-      </header>
-
+      <NavbarAdmin />
       <div className="flex-1">
         <Outlet />
       </div>
@@ -102,7 +46,6 @@ function LayoutAdmin() {
 export default function App() {
   return (
     <BrowserRouter>
-      {/* 2. Colócalo aquí como primer hijo del BrowserRouter */}
       <ScrollToTop />
 
       <Routes>
