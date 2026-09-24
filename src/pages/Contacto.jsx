@@ -1,4 +1,5 @@
 import { useState, useId } from 'react'
+
 import {
   Mail,
   Phone,
@@ -6,12 +7,15 @@ import {
   MessageCircle,
   Send,
   CheckCircle2,
+  AlertCircle,
   Sparkles,
 } from 'lucide-react'
+import { enviarContacto } from '../services/api'
 
 export default function Contact() {
   const [enviado, setEnviado] = useState(false)
   const [cargando, setCargando] = useState(false)
+  const [error, setError] = useState(null)
 
   const idNombre = useId()
   const idCorreo = useId()
@@ -22,16 +26,28 @@ export default function Contact() {
     'Hola, deseo solicitar información sobre los cursos y procesos de validación de CIAE.'
   const linkWhatsapp = `https://wa.me/${numeroWhatsapp}?text=${encodeURIComponent(mensajeInicial)}`
 
-  function manejarEnvio(evento) {
+  async function manejarEnvio(evento) {
     evento.preventDefault()
     setCargando(true)
+    setError(null)
 
-    setTimeout(() => {
-      setCargando(false)
+    const formData = new FormData(evento.target)
+    const datos = {
+      nombre: formData.get('nombre'),
+      correo: formData.get('correo'),
+      mensaje: formData.get('mensaje'),
+    }
+
+    try {
+      await enviarContacto(datos)
       setEnviado(true)
       evento.target.reset()
       setTimeout(() => setEnviado(false), 5000)
-    }, 600)
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setCargando(false)
+    }
   }
 
   return (
@@ -148,6 +164,20 @@ export default function Contact() {
               <span>
                 ¡Mensaje recibido con éxito! Te responderemos en breve.
               </span>
+            </div>
+          )}
+
+          {error && (
+            <div
+              role="alert"
+              aria-live="assertive"
+              className="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 text-red-900 text-sm font-semibold flex items-center gap-3"
+            >
+              <AlertCircle
+                className="w-5 h-5 text-red-600 shrink-0"
+                aria-hidden="true"
+              />
+              <span>{error}</span>
             </div>
           )}
 

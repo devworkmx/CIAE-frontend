@@ -53,6 +53,35 @@ export async function cerrarSesion() {
   }
 }
 
+// Envía el formulario público de contacto. No requiere sesión (no manda
+// `credentials: 'include'` ni cookie), a diferencia de los endpoints
+// autenticados de arriba.
+export async function enviarContacto({ nombre, correo, mensaje }) {
+  const res = await fetch(`${API_URL}/api/public/contacto`, {
+    method: 'POST',
+    headers: getJsonHeaders(),
+    body: JSON.stringify({ nombre, correo, mensaje }),
+  })
+
+  const data = await res.json().catch(() => ({}))
+
+  if (!res.ok) {
+    // El backend regresa 422 con `errors` por campo cuando la validación
+    // de Pydantic falla (ver validation_exception_handler en main.py).
+    if (res.status === 429) {
+      throw new Error(
+        'Enviaste demasiados mensajes en poco tiempo. Intenta de nuevo en un minuto.'
+      )
+    }
+    throw new Error(
+      data.message ||
+        'No se pudo enviar tu mensaje. Intenta de nuevo más tarde.'
+    )
+  }
+
+  return data
+}
+
 export async function renovarCertificado(certificadoId) {
   const res = await fetch(
     `${API_URL}/api/certificados/${certificadoId}/renovar`,
