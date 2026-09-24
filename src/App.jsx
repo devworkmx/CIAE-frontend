@@ -14,6 +14,9 @@ import Admin from './pages/Admin'
 import NotFound from './pages/NotFound'
 import RutaProtegida from './components/RutaProtegida'
 import RutaPublica from './components/RutaPublica'
+import Terminos from './pages/Terminos'
+import AvisoA from './pages/AvisoA'
+import AvisoC from './pages/AvisoC'
 
 // ===================== LAYOUT PÚBLICO =====================
 // Contiene la navegación completa institucional y el Footer
@@ -56,6 +59,9 @@ export default function App() {
           <Route path="/nosotros" element={<Nosotros />} />
           <Route path="/validacion-cursos" element={<Validacion />} />
           <Route path="/validar/:token" element={<ValidarToken />} />
+          <Route path="/terminos" element={<Terminos />} />
+          <Route path="/avisoA" element={<AvisoA />} />
+          <Route path="/avisoC" element={<AvisoC />} />
 
           <Route
             path="/login"

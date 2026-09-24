@@ -298,7 +298,7 @@ export default function Nosotros() {
             </p>
 
             <Link
-              to="/contact"
+              to="/Contacto"
               className="min-h-[48px] inline-flex items-center justify-center gap-2 bg-dorado text-slate-950 font-bold px-8 py-3.5 rounded-xl hover:brightness-95 transition-all shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dorado"
             >
               <span>Contactar a Vinculación</span>
