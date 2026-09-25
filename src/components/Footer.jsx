@@ -13,8 +13,7 @@ function Footer() {
 
   // Enlaces de políticas y normatividad institucional
   const institucional = [
-    { to: '/avisoA', label: 'Aviso de Privacidad para alumnos' },
-    { to: '/avisoC', label: 'Aviso de Privacidad para clientes' },
+    { to: '/privacidad', label: 'Aviso de Privacidad' },
     { to: '/terminos', label: 'Términos de Servicio' },
   ]
 
@@ -85,22 +84,15 @@ function Footer() {
             <h2 className="text-dorado font-bold text-xs tracking-wider uppercase">
               Contacto Oficial
             </h2>
-
             <address className="not-italic space-y-3 text-sm text-slate-200">
               {/* Ubicación física */}
-
-              <a
-                href="https://maps.app.goo.gl/U8qzegWNM8h5Cjcz6"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-start gap-2.5 hover:text-dorado transition-colors"
-              >
+              <div className="flex items-start gap-2.5">
                 <MapPin
                   className="w-4 h-4 text-dorado shrink-0 mt-0.5"
                   aria-hidden="true"
                 />
                 <span>Edificio Académico Central</span>
-              </a>
+              </div>
 
               {/* Correo oficial */}
               <div className="flex items-center gap-2.5">

@@ -53,33 +53,89 @@ export async function cerrarSesion() {
   }
 }
 
-// Envía el formulario público de contacto. No requiere sesión (no manda
-// `credentials: 'include'` ni cookie), a diferencia de los endpoints
-// autenticados de arriba.
-export async function enviarContacto({ nombre, correo, mensaje }) {
-  const res = await fetch(`${API_URL}/api/public/contacto`, {
-    method: 'POST',
-    headers: getJsonHeaders(),
-    body: JSON.stringify({ nombre, correo, mensaje }),
-  })
+// ===================== SUPERADMIN =====================
+// Todas las funciones de esta sección requieren que el usuario logueado
+// tenga rol "superadmin"; el backend responde 403 en caso contrario.
 
+async function _parsearRespuesta(res) {
   const data = await res.json().catch(() => ({}))
-
   if (!res.ok) {
-    // El backend regresa 422 con `errors` por campo cuando la validación
-    // de Pydantic falla (ver validation_exception_handler en main.py).
-    if (res.status === 429) {
-      throw new Error(
-        'Enviaste demasiados mensajes en poco tiempo. Intenta de nuevo en un minuto.'
-      )
-    }
-    throw new Error(
-      data.message ||
-        'No se pudo enviar tu mensaje. Intenta de nuevo más tarde.'
-    )
+    const detalle =
+      typeof data.detail === 'string'
+        ? data.detail
+        : Array.isArray(data.detail)
+          ? data.detail.map((d) => d.msg).join(' ')
+          : 'Ocurrió un error inesperado.'
+    throw new Error(detalle)
   }
-
   return data
+}
+
+export async function listarTenants() {
+  const res = await fetch(`${API_URL}/api/superadmin/tenants`, conSesion())
+  return _parsearRespuesta(res)
+}
+
+export async function obtenerTenant(tenantId) {
+  const res = await fetch(
+    `${API_URL}/api/superadmin/tenants/${tenantId}`,
+    conSesion()
+  )
+  return _parsearRespuesta(res)
+}
+
+export async function obtenerResumenPlataforma() {
+  const res = await fetch(`${API_URL}/api/superadmin/resumen`, conSesion())
+  return _parsearRespuesta(res)
+}
+
+export async function crearTenant(datos) {
+  const res = await fetch(
+    `${API_URL}/api/superadmin/tenants`,
+    conSesion({ method: 'POST', body: JSON.stringify(datos) })
+  )
+  return _parsearRespuesta(res)
+}
+
+export async function actualizarSuscripcion(tenantId, datos) {
+  const res = await fetch(
+    `${API_URL}/api/superadmin/tenants/${tenantId}/suscripcion`,
+    conSesion({ method: 'PATCH', body: JSON.stringify(datos) })
+  )
+  return _parsearRespuesta(res)
+}
+
+export async function listarUsuariosSuperadmin(tenantId) {
+  const query = tenantId ? `?tenant_id=${tenantId}` : ''
+  const res = await fetch(
+    `${API_URL}/api/superadmin/usuarios${query}`,
+    conSesion()
+  )
+  return _parsearRespuesta(res)
+}
+
+export async function crearUsuarioSuperadmin(datos) {
+  const res = await fetch(
+    `${API_URL}/api/superadmin/usuarios`,
+    conSesion({ method: 'POST', body: JSON.stringify(datos) })
+  )
+  return _parsearRespuesta(res)
+}
+
+export async function resetearPasswordSuperadmin(usuarioId, password) {
+  const res = await fetch(
+    `${API_URL}/api/superadmin/usuarios/${usuarioId}/reset-password`,
+    conSesion({ method: 'PATCH', body: JSON.stringify({ password }) })
+  )
+  return _parsearRespuesta(res)
+}
+
+export async function cambiarEstadoUsuarioSuperadmin(usuarioId, activo) {
+  const res = await fetch(
+    `${API_URL}/api/superadmin/usuarios/${usuarioId}/estado`,
+    conSesion({ method: 'PATCH', body: JSON.stringify({ activo }) })
+  )
+  return _parsearRespuesta(res)
 }
 
 export async function renovarCertificado(certificadoId) {

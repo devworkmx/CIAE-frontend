@@ -10,7 +10,7 @@ import {
   AlertCircle,
   LifeBuoy,
 } from 'lucide-react'
-import { API_URL } from '../services/api'
+import { API_URL, verificarSesion } from '../services/api'
 
 // Correo/canal de soporte al que el usuario debe acudir si olvida su
 // contraseña. El sistema NO tiene autorregistro ni recuperación
@@ -53,8 +53,10 @@ export default function Login() {
       }
 
       // El backend ya dejó la cookie httpOnly de sesión; no hay nada que
-      // guardar manualmente en el frontend.
-      navigate('/admin')
+      // guardar manualmente en el frontend. Solo preguntamos quién inició
+      // sesión para mandarlo al panel correcto según su rol.
+      const usuario = await verificarSesion()
+      navigate(usuario?.rol === 'superadmin' ? '/superadmin' : '/admin')
     } catch {
       setError('No fue posible conectar con el servidor.')
     } finally {

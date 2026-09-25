@@ -4,14 +4,20 @@ import { Navigate } from 'react-router-dom'
 import { verificarSesion } from '../services/api'
 
 function RutaPublica({ children }) {
-  const [estado, setEstado] = useState('verificando') // 'verificando' | 'con-sesion' | 'sin-sesion'
+  const [estado, setEstado] = useState('verificando') // 'verificando' | 'con-sesion' | 'con-sesion-superadmin' | 'sin-sesion'
 
   useEffect(() => {
     let cancelado = false
 
     verificarSesion().then((usuario) => {
       if (cancelado) return
-      setEstado(usuario ? 'con-sesion' : 'sin-sesion')
+      if (!usuario) {
+        setEstado('sin-sesion')
+      } else if (usuario.rol === 'superadmin') {
+        setEstado('con-sesion-superadmin')
+      } else {
+        setEstado('con-sesion')
+      }
     })
 
     return () => {
@@ -24,6 +30,10 @@ function RutaPublica({ children }) {
   // se redirige en cuanto el backend responde.
   if (estado === 'con-sesion') {
     return <Navigate to="/admin" replace />
+  }
+
+  if (estado === 'con-sesion-superadmin') {
+    return <Navigate to="/superadmin" replace />
   }
 
   return children

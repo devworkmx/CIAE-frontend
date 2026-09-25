@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Outlet } from 'react-router-dom'
 import ScrollToTop from './components/ScrollToTop'
 import Navbar from './components/Navbar'
 import NavbarAdmin from './components/admin/NavbarAdmin'
+import NavbarSuperadmin from './components/superadmin/NavbarSuperadmin'
 import Footer from './components/Footer'
 
 import Home from './pages/Home'
@@ -11,12 +12,11 @@ import Validacion from './pages/Validacion'
 import Login from './pages/Login'
 import ValidarToken from './pages/ValidarToken'
 import Admin from './pages/Admin'
+import SuperAdmin from './pages/SuperAdmin'
 import NotFound from './pages/NotFound'
 import RutaProtegida from './components/RutaProtegida'
+import RutaSuperadmin from './components/RutaSuperadmin'
 import RutaPublica from './components/RutaPublica'
-import Terminos from './pages/Terminos'
-import AvisoA from './pages/AvisoA'
-import AvisoC from './pages/AvisoC'
 
 // ===================== LAYOUT PÚBLICO =====================
 // Contiene la navegación completa institucional y el Footer
@@ -45,6 +45,20 @@ function LayoutAdmin() {
   )
 }
 
+// ===================== LAYOUT SUPERADMIN =====================
+// El superadmin no pertenece a ningún tenant, así que usa su propia barra
+// (sin badge de institución) en vez de NavbarAdmin.
+function LayoutSuperadmin() {
+  return (
+    <div className="min-h-screen bg-slate-50 flex flex-col">
+      <NavbarSuperadmin />
+      <div className="flex-1">
+        <Outlet />
+      </div>
+    </div>
+  )
+}
+
 // ===================== ENRUTADOR PRINCIPAL =====================
 export default function App() {
   return (
@@ -59,9 +73,6 @@ export default function App() {
           <Route path="/nosotros" element={<Nosotros />} />
           <Route path="/validacion-cursos" element={<Validacion />} />
           <Route path="/validar/:token" element={<ValidarToken />} />
-          <Route path="/terminos" element={<Terminos />} />
-          <Route path="/avisoA" element={<AvisoA />} />
-          <Route path="/avisoC" element={<AvisoC />} />
 
           <Route
             path="/login"
@@ -85,6 +96,17 @@ export default function App() {
           }
         >
           <Route path="/admin" element={<Admin />} />
+        </Route>
+
+        {/* Ruta exclusiva del superadministrador de la plataforma */}
+        <Route
+          element={
+            <RutaSuperadmin>
+              <LayoutSuperadmin />
+            </RutaSuperadmin>
+          }
+        >
+          <Route path="/superadmin" element={<SuperAdmin />} />
         </Route>
       </Routes>
     </BrowserRouter>
