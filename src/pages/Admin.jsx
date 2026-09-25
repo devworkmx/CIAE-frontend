@@ -4,6 +4,9 @@ import { API_URL } from '../services/api'
 import ModuloCertificados from '../components/admin/ModuloCertificados'
 import ModuloAlumnos from '../components/admin/ModuloAlumnos'
 import ModuloCursos from '../components/admin/ModuloCursos'
+import BannerLicenciaCongelada, {
+  ChipPlanSuscripcion,
+} from '../components/admin/EstadoSuscripcionBanner'
 import {
   Award,
   Users,
@@ -12,6 +15,7 @@ import {
   XCircle,
   RefreshCw,
   GraduationCap,
+  Lock,
 } from 'lucide-react'
 
 export default function Admin() {
@@ -86,6 +90,20 @@ export default function Admin() {
     cargarDatos()
   }, [cargarDatos])
 
+  const tenant = usuarioActual?.tenant || null
+  // El backend ya rechaza cualquier escritura si el tenant está congelado o
+  // suspendido (require_suscripcion_activa), esto es solo la señal para que
+  // el frontend lo muestre de forma clara y bloquee la interacción antes de
+  // siquiera intentar la petición.
+  const soloLectura = Boolean(tenant && tenant.estado_acceso !== 'activo')
+
+  const avisarLicenciaCongelada = useCallback(() => {
+    mostrarAlerta(
+      'Tu licencia está congelada: solo puedes consultar información. Contacta al administrador de la plataforma para renovar.',
+      'error'
+    )
+  }, [mostrarAlerta])
+
   return (
     <main className="min-h-screen bg-slate-50 py-8 sm:py-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -110,6 +128,12 @@ export default function Admin() {
                   Supervisión de folios, catálogo curricular y padrón de
                   acreditaciones.
                 </p>
+              )}
+
+              {tenant && (
+                <div className="pt-2">
+                  <ChipPlanSuscripcion tenant={tenant} />
+                </div>
               )}
             </div>
 
@@ -147,6 +171,9 @@ export default function Admin() {
             </div>
           </div>
         </header>
+
+        {/* Aviso de licencia vencida/suspendida: siempre visible mientras dure */}
+        <BannerLicenciaCongelada tenant={tenant} />
 
         {/* Notificación flotante accesible */}
         {alerta.visible && (
@@ -234,7 +261,33 @@ export default function Admin() {
             <span>Sincronizando información institucional...</span>
           </div>
         ) : (
-          <div>
+          <div className="relative">
+            {/* Congela la interacción (no la visibilidad) cuando la licencia
+                no está activa. El dato real y la defensa real viven en el
+                backend; esto es solo para que la UI se sienta coherente y
+                no deje que alguien arme una edición que el servidor va a
+                rechazar de todos modos. */}
+            {soloLectura && (
+              <div
+                role="button"
+                tabIndex={0}
+                aria-label="Contenido en modo solo lectura: licencia vencida o suspendida"
+                onClick={avisarLicenciaCongelada}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ')
+                    avisarLicenciaCongelada()
+                }}
+                className="absolute inset-0 z-10 cursor-not-allowed rounded-2xl"
+              />
+            )}
+
+            {soloLectura && (
+              <div className="mb-4 flex items-center gap-2 text-xs font-bold text-red-700 bg-red-50 border border-red-200 rounded-xl px-3.5 py-2.5">
+                <Lock className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+                Modo solo lectura: renueva tu licencia para volver a editar.
+              </div>
+            )}
+
             {seccion === 'certificados' && (
               <ModuloCertificados
                 cursos={cursos}

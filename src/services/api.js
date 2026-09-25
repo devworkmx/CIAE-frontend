@@ -60,13 +60,22 @@ export async function cerrarSesion() {
 async function _parsearRespuesta(res) {
   const data = await res.json().catch(() => ({}))
   if (!res.ok) {
-    const detalle =
-      typeof data.detail === 'string'
-        ? data.detail
-        : Array.isArray(data.detail)
-          ? data.detail.map((d) => d.msg).join(' ')
-          : 'Ocurrió un error inesperado.'
-    throw new Error(detalle)
+    let detalle = 'Ocurrió un error inesperado.'
+    if (typeof data.detail === 'string') {
+      detalle = data.detail
+    } else if (Array.isArray(data.detail)) {
+      detalle = data.detail.map((d) => d.msg).join(' ')
+    } else if (data.detail && typeof data.detail === 'object') {
+      // El backend manda { code, estado, mensaje } cuando el tenant está
+      // congelado/suspendido (ver require_suscripcion_activa en el backend).
+      detalle = data.detail.mensaje || detalle
+    }
+    const error = new Error(detalle)
+    if (data.detail && typeof data.detail === 'object' && data.detail.code) {
+      error.code = data.detail.code
+      error.estadoSuscripcion = data.detail.estado
+    }
+    throw error
   }
   return data
 }
@@ -102,6 +111,23 @@ export async function actualizarSuscripcion(tenantId, datos) {
     `${API_URL}/api/superadmin/tenants/${tenantId}/suscripcion`,
     conSesion({ method: 'PATCH', body: JSON.stringify(datos) })
   )
+  return _parsearRespuesta(res)
+}
+
+// Renovación rápida: el superadmin solo indica cuántos meses pagó el
+// cliente; el backend calcula la nueva fecha de vencimiento respetando el
+// tiempo que le quedaba (si tenía) y reactiva el acceso.
+export async function renovarSuscripcion(tenantId, datos) {
+  const res = await fetch(
+    `${API_URL}/api/superadmin/tenants/${tenantId}/renovar`,
+    conSesion({ method: 'POST', body: JSON.stringify(datos) })
+  )
+  return _parsearRespuesta(res)
+}
+
+// Catálogo sugerido de planes/duraciones para los formularios del panel.
+export async function obtenerPlanesSuscripcion() {
+  const res = await fetch(`${API_URL}/api/superadmin/planes`, conSesion())
   return _parsearRespuesta(res)
 }
 
@@ -149,10 +175,5 @@ export async function renovarCertificado(certificadoId) {
       },
     }
   )
-
-  const data = await res.json()
-  if (!res.ok) {
-    throw new Error(data.detail || 'No fue posible renovar el certificado.')
-  }
-  return data
+  return _parsearRespuesta(res)
 }
